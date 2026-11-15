@@ -92,4 +92,6 @@ Use `make run` to check app behaviour: it launches through LaunchServices with a
 
 - Changing an existing app bundle in place (adopting runs `chgrp -hR admin` over it) needs macOS App Management permission for the app brew runs under, Caskroom here; without it brew fails with `Operation not permitted` and `OperationRun.blockedByAppManagement` explains and links the settings pane. Caskroom is ad-hoc signed, so macOS may forget that permission after each `make app`.
 
+- Uninstall and Delete App Data (`zap`) needs Full Disk Access for Caskroom whenever the cask's zap list names a folder macOS protects, such as `~/Library/Application Support/com.apple.sharedfilelist` (common: recent-documents lists). brew can't even list it, stops with "Please enable Full Disk Access for your terminal", and leaves the cask half removed: the app moved into its Caskroom folder, still listed as installed, no data deleted. Granting the permission and running the zap again finishes it. `OperationRun.blockedByFullDiskAccess` explains this and links the settings pane.
+
 - Commands run as root by sudo ignore our SIGTERM; sudo forwards it, but an installer may still finish.

@@ -195,6 +195,17 @@ final class OperationRun: Identifiable {
 
     /// Privacy & Security ▸ App Management.
     static let appManagementSettings = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AppBundles")!
+
+    /// macOS refused to let brew look into a protected folder while deleting
+    /// files, which brew reports as needing Full Disk Access "for your terminal":
+    /// brew runs as Caskroom. Zap lists often name one, such as
+    /// `~/Library/Application Support/com.apple.sharedfilelist`.
+    var blockedByFullDiskAccess: Bool {
+        log.contains { $0.text.contains("Please enable Full Disk Access") }
+    }
+
+    /// Privacy & Security ▸ Full Disk Access.
+    static let fullDiskAccessSettings = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!
 }
 
 @Observable @MainActor
@@ -1330,6 +1341,16 @@ final class BrewStore {
             let name = run.operation.ref.flatMap { package($0)?.title ?? $0.name } ?? "the app"
             let unchanged = if case .adopt = run.operation { " The app is as it was." } else { "" }
             return "macOS didn't let Homebrew change \(name). Allow Caskroom under System Settings ▸ Privacy & Security ▸ App Management, then try again.\(unchanged)"
+        }
+        if run.blockedByFullDiskAccess {
+            let name = run.operation.ref.flatMap { package($0)?.title ?? $0.name } ?? "the app"
+            // brew stops at the first protected folder, having already moved the
+            // app aside: it's out of Applications, still listed as installed, and
+            // its data is all still there.
+            let state = if case .zap = run.operation {
+                " \(name) is out of your Applications folder but Homebrew still lists it, and none of its data was deleted."
+            } else { "" }
+            return "macOS didn't let Homebrew into one of \(name)'s data folders.\(state) Allow Caskroom under System Settings ▸ Privacy & Security ▸ Full Disk Access, then try again."
         }
         // Adopting needs the app in place to be the cask's own version.
         if run.log.contains(where: { $0.text.contains("is different from the one being installed") }) {

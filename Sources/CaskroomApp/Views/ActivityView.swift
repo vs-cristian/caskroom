@@ -342,6 +342,10 @@ private struct LogView: View {
                     Button("Open App Management Settings") { NSWorkspace.shared.open(OperationRun.appManagementSettings) }
                         .padding(.horizontal, 12)
                         .padding(.bottom, 8)
+                } else if run.blockedByFullDiskAccess {
+                    Button("Open Full Disk Access Settings") { NSWorkspace.shared.open(OperationRun.fullDiskAccessSettings) }
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, 8)
                 }
             }
 
