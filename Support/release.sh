@@ -86,6 +86,6 @@ gh repo clone "$TAP" "$tap" -- --quiet --depth 1
 mkdir -p "$tap/Casks"
 cp "$cask" "$tap/Casks/caskroom.rb"
 git -C "$tap" add Casks/caskroom.rb
-git -C "$tap" commit --quiet -m "caskroom $version"
+git -C "$tap" -c user.email="$(git config user.email)" commit --quiet -m "caskroom $version"
 git -C "$tap" push --quiet
 echo "released $tag: brew install --cask ${TAP%/homebrew-tap}/tap/caskroom"
