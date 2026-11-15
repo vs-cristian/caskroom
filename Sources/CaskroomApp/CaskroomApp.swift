@@ -22,6 +22,9 @@ struct CaskroomApp: App {
         .defaultSize(width: 1180, height: 760)
         .commands {
             CommandGroup(replacing: .importExport) {
+                Button("Import Brewfile…") { importBrewfile(store) }
+                    .keyboardShortcut("o")
+                    .disabled(store.service == nil)
                 Button("Export Brewfile…") { exportBrewfile(store) }
                     .disabled(store.service == nil)
             }
@@ -60,6 +63,7 @@ struct CaskroomApp: App {
 struct PackageCommands: Commands {
     let store: BrewStore
     @FocusedValue(\.packageRef) private var ref
+    @FocusedValue(\.selectedPackages) private var selected
 
     var body: some Commands {
         CommandMenu("Package") {
@@ -77,8 +81,12 @@ struct PackageCommands: Commands {
                 .disabled(store.service == nil || store.isPending(.cleanup))
             Button("Run Doctor…") { store.doctor = .checking }
                 .disabled(store.service == nil || store.doctor != nil)
+            Button("Add Tap…") { store.addingTap = true }
+                .disabled(store.service == nil)
             Divider()
-            if let ref {
+            if let selected {
+                SelectionMenu(store: store, refs: selected)
+            } else if let ref {
                 PackageMenu(store: store, ref: ref)
             } else {
                 Button("Install") {}.disabled(true)
@@ -118,6 +126,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate()
+        PlainClick.install()
         Notifier.setUp { [store] in
             store.searchText = ""
             store.sidebar = .updates

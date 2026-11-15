@@ -338,3 +338,88 @@ public struct ServiceEntry: Identifiable, Hashable, Sendable {
         self.errorLogPath = errorLogPath
     }
 }
+
+/// A tapped repository of formulae and casks beyond Homebrew's own, from
+/// `brew tap-info --json --installed`.
+public struct Tap: Identifiable, Hashable, Sendable {
+    public var id: String { name }
+    /// "mongodb/brew": the GitHub user and the repository without its
+    /// `homebrew-` prefix.
+    public let name: String
+    /// Where brew fetches it from: usually a GitHub URL, possibly a
+    /// `git@host:path` address for a tap added with its own URL.
+    public let remote: String?
+    /// Added with a URL of its own rather than from GitHub by name, so
+    /// tapping it again needs that URL.
+    public let customRemote: Bool
+    /// One of Homebrew's own.
+    public let official: Bool
+    public let formulaCount: Int
+    public let caskCount: Int
+    /// brew's own words: "5 days ago".
+    public let lastCommit: String?
+    public let path: String?
+
+    /// The remote as a web page, when it's one.
+    public var webURL: URL? {
+        guard let remote, remote.hasPrefix("https://") || remote.hasPrefix("http://") else { return nil }
+        return URL(string: remote.hasSuffix(".git") ? String(remote.dropLast(4)) : remote)
+    }
+
+    /// Whether `name` is a tap name brew accepts: `user/repo`, the repository
+    /// with or without its `homebrew-` prefix.
+    public static func isValidName(_ name: String) -> Bool {
+        let parts = name.split(separator: "/", omittingEmptySubsequences: false)
+        let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")
+        return parts.count == 2 && parts.allSatisfy { part in
+            !part.isEmpty && part.unicodeScalars.allSatisfy(allowed.contains) && !part.hasPrefix(".")
+        }
+    }
+
+    public init(name: String, remote: String? = nil, customRemote: Bool = false, official: Bool = false,
+                formulaCount: Int = 0, caskCount: Int = 0, lastCommit: String? = nil, path: String? = nil) {
+        self.name = name
+        self.remote = remote
+        self.customRemote = customRemote
+        self.official = official
+        self.formulaCount = formulaCount
+        self.caskCount = caskCount
+        self.lastCommit = lastCommit
+        self.path = path
+    }
+}
+
+/// What a Brewfile asks for and which of it this Mac lacks, in brew's own
+/// words: `brew bundle list` for the entries, `brew bundle check` for what's
+/// missing. Caskroom never reads the file itself: it's Ruby, and only brew
+/// knows what it means.
+public struct BrewfilePlan: Hashable, Sendable {
+    public struct Entry: Hashable, Sendable {
+        public let name: String
+        /// Not installed (or not tapped) yet: `brew bundle install` would add it.
+        public let needed: Bool
+
+        public init(name: String, needed: Bool) {
+            self.name = name
+            self.needed = needed
+        }
+    }
+
+    public let taps: [Entry]
+    public let formulae: [Entry]
+    public let casks: [Entry]
+    /// Entries for other tools brew bundle drives: Mac App Store apps (`mas`),
+    /// VS Code extensions, npm, Go and Cargo packages and so on.
+    public let other: [Entry]
+
+    public var all: [Entry] { taps + formulae + casks + other }
+    /// Whether everything is in place already, so installing would do nothing.
+    public var isSatisfied: Bool { !all.contains(where: \.needed) }
+
+    public init(taps: [Entry] = [], formulae: [Entry] = [], casks: [Entry] = [], other: [Entry] = []) {
+        self.taps = taps
+        self.formulae = formulae
+        self.casks = casks
+        self.other = other
+    }
+}

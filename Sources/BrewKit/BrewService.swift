@@ -67,6 +67,32 @@ public struct BrewService: Sendable {
         BrewParser.names(from: try await runner.run(["tap"]))
     }
 
+    /// What's tapped, with counts and where each comes from. Leaves out
+    /// homebrew/core and homebrew/cask unless they're really tapped.
+    public func tapInfo() async throws -> [Tap] {
+        try await decode(["tap-info", "--json", "--installed"], BrewParser.taps)
+    }
+
+    /// What the Brewfile at `url` lists and which of it is missing here.
+    /// brew evaluates the file (it's Ruby) for each of these commands.
+    public func brewfilePlan(at url: URL) async throws -> BrewfilePlan {
+        let file = "--file=\(url.path)"
+        async let taps = runner.run(["bundle", "list", file, "--tap"])
+        async let formulae = runner.run(["bundle", "list", file, "--formula"])
+        async let casks = runner.run(["bundle", "list", file, "--cask"])
+        async let all = runner.run(["bundle", "list", file, "--all"])
+        // check exits 1 when something's missing, and says what on stderr.
+        var check: [String] = []
+        do {
+            for try await line in runner.stream(["bundle", "check", "--verbose", "--no-upgrade", file]) {
+                check.append(line.text)
+            }
+        } catch BrewError.commandFailed {}
+        return try await BrewParser.brewfilePlan(
+            taps: taps, formulae: formulae, casks: casks, all: all, check: check.joined(separator: "\n")
+        )
+    }
+
     /// `info` rather than `list`: the same rows, plus pids, log paths and
     /// whether each starts at login.
     public func services() async throws -> [ServiceEntry] {

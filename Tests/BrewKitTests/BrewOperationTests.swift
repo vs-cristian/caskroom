@@ -31,6 +31,19 @@ final class BrewOperationTests: XCTestCase {
                        #"brew bundle dump --force '--file=/Users/me/My Files/Bob'\''s Brewfile'"#)
     }
 
+    func testTapsAndBrewfileImport() {
+        XCTAssertEqual(BrewOperation.tap("mongodb/brew").arguments, ["tap", "mongodb/brew"])
+        XCTAssertEqual(BrewOperation.tap("me/tools", remote: "git@example.com:me/tools.git").command,
+                       "brew tap me/tools git@example.com:me/tools.git")
+        XCTAssertEqual(BrewOperation.untap("mongodb/brew").command, "brew untap mongodb/brew")
+        // Importing installs what's missing and leaves the rest at its version.
+        XCTAssertEqual(BrewOperation.installBrewfile(URL(fileURLWithPath: "/Users/me/My Brewfile")).command,
+                       "brew bundle install --no-upgrade '--file=/Users/me/My Brewfile'")
+        XCTAssertTrue(BrewOperation.installBrewfile(URL(fileURLWithPath: "/tmp/Brewfile")).allowsAutoUpdate)
+        XCTAssertFalse(BrewOperation.tap("a/b").allowsAutoUpdate)
+        XCTAssertNil(BrewOperation.untap("a/b").ref)
+    }
+
     func testUpdateAllHoldingBackApps() {
         // Every formula, and only the casks named; the open ones are left out.
         let operation = BrewOperation.upgradeAll(greedy: true, casks: ["iina"])

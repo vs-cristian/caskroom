@@ -53,6 +53,14 @@ public enum BrewOperation: Hashable, Sendable {
     /// Writes a Brewfile of every installed formula, cask and tap to `url`,
     /// replacing what's there (the save panel has already asked).
     case dumpBrewfile(URL)
+    /// Installs what the Brewfile at `url` lists and this Mac lacks. Already
+    /// installed packages stay at their versions (`--no-upgrade`): importing
+    /// isn't updating.
+    case installBrewfile(URL)
+    /// Adds a tap: `user/repo` from GitHub, or from `remote` (any git URL).
+    case tap(String, remote: String? = nil)
+    /// Removes a tap. brew refuses while anything installed came from it.
+    case untap(String)
     case service(ServiceAction, name: String)
 
     /// The brew commands to run, in order; most operations are one. A step
@@ -94,6 +102,9 @@ public enum BrewOperation: Hashable, Sendable {
         case .update: return ["update"]
         case .cleanup: return ["cleanup"]
         case let .dumpBrewfile(url): return ["bundle", "dump", "--force", "--file=\(url.path)"]
+        case let .installBrewfile(url): return ["bundle", "install", "--no-upgrade", "--file=\(url.path)"]
+        case let .tap(name, remote): return ["tap", name] + (remote.map { [$0] } ?? [])
+        case let .untap(name): return ["untap", name]
         case let .service(action, name): return ["services", action.rawValue, name]
         }
     }
@@ -112,7 +123,7 @@ public enum BrewOperation: Hashable, Sendable {
     /// would in a terminal; everything else runs against the index as it is.
     public var allowsAutoUpdate: Bool {
         switch self {
-        case .install, .adopt, .upgrade, .reinstall, .upgradeAll, .upgradeVulnerable: return true
+        case .install, .adopt, .upgrade, .reinstall, .upgradeAll, .upgradeVulnerable, .installBrewfile: return true
         default: return false
         }
     }
@@ -125,7 +136,7 @@ public enum BrewOperation: Hashable, Sendable {
             return ref
         case let .service(_, name):
             return PackageRef(.formula, name)
-        case .upgradeAll, .upgradeVulnerable, .update, .cleanup, .dumpBrewfile:
+        case .upgradeAll, .upgradeVulnerable, .update, .cleanup, .dumpBrewfile, .installBrewfile, .tap, .untap:
             return nil
         }
     }

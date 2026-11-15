@@ -92,6 +92,28 @@ struct RootView: View {
         } message: { request in
             Text(revertMessage(request))
         }
+        .confirmationDialog(
+            bulkUninstallTitle,
+            isPresented: Binding(
+                get: { store.bulkUninstall != nil },
+                set: { if !$0 { store.bulkUninstall = nil } }
+            ),
+            presenting: store.bulkUninstall
+        ) { plan in
+            if plan.order.isEmpty {
+                Button("OK", role: .cancel) {}
+            } else {
+                Button(plan.order.count == 1 ? "Uninstall" : "Uninstall \(plan.order.count)", role: .destructive) { store.uninstall(plan) }
+            }
+        } message: { plan in
+            Text(bulkUninstallMessage(plan))
+        }
+        .sheet(item: $store.brewfileImport) { preview in
+            BrewfileImportSheet(preview: preview)
+        }
+        .sheet(isPresented: $store.addingTap) {
+            AddTapSheet()
+        }
         .sheet(isPresented: Binding(
             get: { store.doctor != nil },
             set: { if !$0 { store.doctor = nil } }
@@ -126,6 +148,40 @@ struct RootView: View {
         return text
     }
 
+    private var bulkUninstallTitle: String {
+        guard let plan = store.bulkUninstall else { return "" }
+        if plan.order.isEmpty { return "Can't Uninstall These Packages" }
+        return plan.order.count == 1 ? "Uninstall \(title(plan.order[0]))?" : "Uninstall \(plan.order.count) Packages?"
+    }
+
+    /// What goes, and what stays because something else needs it.
+    private func bulkUninstallMessage(_ plan: BulkUninstall) -> String {
+        var parts: [String] = []
+        if !plan.order.isEmpty {
+            let sorted = plan.order.sorted { title($0).localizedStandardCompare(title($1)) == .orderedAscending }
+            var text = "\(names(sorted)) will be uninstalled."
+            if plan.order.contains(where: { $0.kind == .cask }) {
+                text += " Apps are removed from your Applications folder, and their data stays."
+            }
+            parts.append(text)
+        }
+        for (ref, neededBy) in plan.kept {
+            parts.append("\(title(ref)) stays: \(names(neededBy)) \(neededBy.count == 1 ? "depends" : "depend") on it.")
+        }
+        return parts.joined(separator: "\n\n")
+    }
+
+    private func title(_ ref: PackageRef) -> String {
+        store.package(ref)?.title ?? ref.name
+    }
+
+    /// "a, b, c and 4 more"
+    private func names(_ refs: [PackageRef]) -> String {
+        let shown = refs.prefix(refs.count > 8 ? 6 : 8).map(title)
+        let more = refs.count - shown.count
+        return more > 0 ? shown.joined(separator: ", ") + " and \(more) more" : shown.formatted(.list(type: .and))
+    }
+
     private var uninstallTitle: String {
         guard let ref = store.uninstallCandidate else { return "" }
         let name = store.package(ref)?.title ?? ref.name
@@ -142,6 +198,7 @@ struct RootView: View {
             case .updates: UpdatesPage()
             case .security: SecurityPage()
             case .services: ServicesPage()
+            case .taps: TapsPage()
             case .adopt: AdoptPage()
             case let .library(filter): LibraryPage(filter: filter)
             }

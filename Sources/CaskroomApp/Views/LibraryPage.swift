@@ -11,6 +11,8 @@ struct LibraryPage: View {
     let filter: LibraryFilter
     @AppStorage("librarySort") private var sort = Sort.name
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// Rows chosen with ⌘- or ⇧-click, for acting on several at once.
+    @State private var selection: Set<PackageRef> = []
 
     var body: some View {
         Group {
@@ -22,7 +24,7 @@ struct LibraryPage: View {
             } else if packages.isEmpty {
                 EmptyPage(title: emptyTitle, symbol: filter.symbol, message: emptyMessage)
             } else {
-                List {
+                List(selection: $selection) {
                     if filter == .all {
                         section("Apps", packages.filter { $0.kind == .cask })
                         section("Formulae", packages.filter { $0.kind == .formula })
@@ -39,8 +41,10 @@ struct LibraryPage: View {
                 .animation(Motion.list(reduceMotion: reduceMotion), value: packages.map(\.ref))
                 // Another sidebar filter is another list, not this one rearranged.
                 .id(filter)
+                .packageSelection($selection)
             }
         }
+        .onChange(of: filter) { selection = [] }
         .navigationTitle(filter.title)
         .navigationSubtitle(packages.count == 1 ? "1 package" : "\(packages.count) packages")
         .toolbar {
@@ -72,16 +76,14 @@ struct LibraryPage: View {
     }
 
     private func rows(_ packages: [Package]) -> some View {
+        // Not links: a click opens the page, ⌘-click selects (see PackageSelection).
         ForEach(packages) { package in
-            NavigationLink(value: package.ref) {
-                LibraryRow(
-                    package: package,
-                    update: store.outdatedItem(package.ref),
-                    showsReason: filter == .attention,
-                    dependencyUsage: filter == .dependencies ? usage(of: package) : nil
-                )
-            }
-            .contextMenu { PackageMenu(store: store, ref: package.ref) }
+            LibraryRow(
+                package: package,
+                update: store.outdatedItem(package.ref),
+                showsReason: filter == .attention,
+                dependencyUsage: filter == .dependencies ? usage(of: package) : nil
+            )
         }
     }
 

@@ -11,13 +11,15 @@ Caskroom is a front end to the `brew` command you already have. It runs `brew`, 
 ## What it does
 
 - **Discover.** Top apps, top command-line tools, what's trending and what's new in Homebrew, laid out like the App Store, with real app icons and project logos.
-- **Updates.** One list for formulae and apps, with release notes per package, Update All, and a history of what Caskroom updated.
+- **Updates.** One list for formulae and apps, with release notes per package, Update All, and a history of what Caskroom updated. ⌘-click several to update, pin or uninstall them together, here or in your library.
 - **Adopt.** Finds apps already in your Applications folder that Homebrew has a cask for and hands them over without downloading them again.
 - **Revert.** Puts a formula back to the version it had before its last update.
 - **Services.** `brew services` as Login Items: a switch for start at login, Run and Stop for right now, and the log one click away.
 - **Search.** Packages by name, or by the command they install (`rg` finds ripgrep).
 - **Security, if you turn it on.** Checks installed formulae against OSV.dev with `brew vulns` and updates the ones that have a fix.
-- **Maintenance.** Clean Up with a preview of what it frees, Doctor, Export Brewfile, and warnings for deprecated or disabled packages.
+- **Taps.** Add and remove third-party taps, and see what each one has given you.
+- **Brewfiles.** Export what you have, or import a Brewfile and see what it would install before it does.
+- **Maintenance.** Clean Up with a preview of what it frees, Doctor, and warnings for deprecated or disabled packages.
 
 <p align="center">
 <picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/updates-dark.avif"><img src="docs/assets/updates.avif" alt="The Updates page: packages with old and new versions, What's New links, a recent update with Revert, and a Clean Up banner." width="32%"></picture>

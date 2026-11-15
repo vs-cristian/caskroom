@@ -93,6 +93,13 @@ enum SnapshotDriver {
                                              registered: true, logPath: b.logPath, errorLogPath: b.errorLogPath)
         }
 
+        // CASKROOM_SNAPSHOT_SELECTION=1: clicks rows the way a person would and
+        // prints PASS or FAIL for each check, with a capture of each step.
+        if env["CASKROOM_SNAPSHOT_SELECTION"] == "1" {
+            await checkSelection(store: store, window: window, output: output)
+            NSApp.terminate(nil)
+            return
+        }
         let firstFormula = store.installed.first { $0.kind == .formula && $0.installedOnRequest && $0.caveats != nil }?.ref
         let firstApp = store.installed.first { $0.appPath != nil }?.ref
         let firstDependency = store.installed.first { !store.dependents(of: $0.ref).isEmpty }?.ref
@@ -140,7 +147,37 @@ enum SnapshotDriver {
             ("18-updates-tags", 3, { store.searchText = ""; store.sidebar = .updates }),
             ("13-deprecated", 4, { store.path = NavigationPath([store.needingAttention.first?.ref ?? deprecated]) }),
             ("14-service-page", 4, { store.path = NavigationPath(store.services.first.map { [$0.ref] } ?? []) }),
-            ("9-activity", 2, { store.path = NavigationPath(); store.searchText = ""; store.sidebar = .library(.all); store.showActivity = true }),
+            ("19-taps", 3, { store.searchText = ""; store.path = NavigationPath(); store.sidebar = .taps }),
+            ("20-add-tap", 2, { store.addingTap = true }),
+            ("21-brewfile-import", 6, {
+                store.addingTap = false
+                // A sample, so the capture shows each kind: some here already, some not.
+                let url = output.appendingPathComponent("Brewfile")
+                try? """
+                tap "mongodb/brew"
+                tap "hashicorp/tap"
+                brew "gh"
+                brew "ripgrep"
+                brew "hashicorp/tap/terraform"
+                cask "iina"
+                cask "zed"
+                cask "rectangle"
+                mas "Xcode", id: 497799835
+                vscode "rust-lang.rust-analyzer"
+                """.write(to: url, atomically: true, encoding: .utf8)
+                Task { await store.previewBrewfile(url) }
+            }),
+            ("22-bulk-uninstall", 2, {
+                store.brewfileImport = nil
+                // Two apps, plus a dependency something outside the selection needs.
+                let apps = store.installed.filter { $0.kind == .cask }.prefix(2).map(\.ref)
+                let needed = store.installed.first { !store.dependents(of: $0.ref).isEmpty }.map { [$0.ref] } ?? []
+                store.bulkUninstall = store.uninstallPlan(Set(apps + needed))
+            }),
+            ("9-activity", 2, {
+                store.bulkUninstall = nil
+                store.path = NavigationPath(); store.searchText = ""; store.sidebar = .library(.all); store.showActivity = true
+            }),
             ("10-inserted-row", 2, {
                 // A package appearing in a list that's already on screen, as after an install.
                 store.showActivity = false
@@ -157,6 +194,10 @@ enum SnapshotDriver {
             guard only?.contains(scene.name) != false else { continue }
             try? await Task.sleep(for: .seconds(scene.wait))
             capture(window, to: output.appendingPathComponent("\(scene.name).png"))
+            // Sheets and dialogs are windows of their own.
+            if let sheet = window.attachedSheet?.contentView {
+                capture(sheet, to: output.appendingPathComponent("\(scene.name)-sheet.png"))
+            }
             // Popovers are their own windows, captured while this scene holds one open.
             if scene.name == "9-activity",
                let popover = NSApp.windows.first(where: { $0 !== window && $0.isVisible && $0.className.contains("Popover") }),
@@ -181,6 +222,67 @@ enum SnapshotDriver {
         store.doctor = nil
         try? await Task.sleep(for: .seconds(1))
         NSApp.terminate(nil)
+    }
+
+    /// Selecting rows with ⌘-click while a plain click opens a page; see
+    /// `PackageSelection`. Points are from the window's top left, for its
+    /// 1180×760 size: the first rows of each list.
+    private static func checkSelection(store: BrewStore, window: NSWindow, output: URL) async {
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
+        var step = 0
+        func settle(_ name: String) async {
+            try? await Task.sleep(for: .seconds(1.5))
+            step += 1
+            capture(window, to: output.appendingPathComponent("s\(step)-\(name).png"))
+        }
+        func expect(_ what: String, _ ok: Bool) { print(ok ? "PASS" : "FAIL", what) }
+
+        store.sidebar = .library(.all)
+        await settle("library")
+        click(window, at: NSPoint(x: 600, y: 156), flags: .command)
+        click(window, at: NSPoint(x: 600, y: 200), flags: .command)
+        await settle("library-selected")
+        expect("⌘-click selects without opening", store.path.isEmpty)
+        click(window, at: NSPoint(x: 600, y: 244))
+        await settle("library-click")
+        expect("a plain click opens the page", store.path.count == 1)
+        store.path = NavigationPath()
+
+        store.sidebar = .updates
+        await settle("updates")
+        let rows = (ProcessInfo.processInfo.environment["CASKROOM_SELECTION_ROWS"] ?? "")
+            .split(separator: ",").compactMap { Double($0) }
+        guard rows.count >= 4 else { return }
+        click(window, at: NSPoint(x: 600, y: rows[0]), flags: .command)
+        click(window, at: NSPoint(x: 600, y: rows[1]), flags: .command)
+        await settle("updates-selected")
+        expect("⌘-click selects updates without opening", store.path.isEmpty)
+        // A link inside a row does its own thing, without opening the page.
+        click(window, at: NSPoint(x: rows[2], y: rows[3]))
+        await settle("updates-link")
+        expect("a link in a row doesn't open the page", store.path.isEmpty)
+        if rows.count >= 5 {
+            store.showActivity = false
+            click(window, at: NSPoint(x: 600, y: rows[4]))
+            await settle("updates-recent")
+            expect("an Updated Recently row opens its page", store.path.count == 1)
+        }
+    }
+
+    /// A click at `point`, measured from the window's top left, sent to the
+    /// window directly: no Accessibility permission needed.
+    static func click(_ window: NSWindow, at point: NSPoint, flags: NSEvent.ModifierFlags = []) {
+        let location = NSPoint(x: point.x, y: window.frame.height - point.y)
+        for type in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
+            guard let event = NSEvent.mouseEvent(
+                with: type, location: location, modifierFlags: flags,
+                timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: window.windowNumber,
+                context: nil, eventNumber: 0, clickCount: 1, pressure: type == .leftMouseDown ? 1 : 0
+            ) else { continue }
+            // Through the app, so its event monitors (PlainClick) see it, as a real click.
+            NSApp.sendEvent(event)
+        }
     }
 
     private static func capture(_ window: NSWindow, to url: URL) {

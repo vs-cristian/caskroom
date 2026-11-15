@@ -6,6 +6,8 @@ struct UpdatesPage: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// When the page appeared: updates that finish after it just emptied the list.
     @State private var openedAt = Date.now
+    /// Rows chosen with ⌘- or ⇧-click, to update several at once.
+    @State private var selection: Set<PackageRef> = []
 
     var body: some View {
         Group {
@@ -21,17 +23,15 @@ struct UpdatesPage: View {
                     tint: .green
                 )
             } else {
-                List {
+                List(selection: $selection) {
                     if items.isEmpty {
                         // The checkmark draws in only when you watched the last update finish.
                         UpToDateRow(drawsIn: recent.first.map { $0.date > openedAt } ?? false)
                     } else {
                         Section {
+                            // Not links: a click opens the page, ⌘-click selects (see PackageSelection).
                             ForEach(items) { item in
-                                NavigationLink(value: item.ref) {
-                                    UpdateRow(item: item, package: store.installedPackage(item.ref))
-                                }
-                                .contextMenu { PackageMenu(store: store, ref: item.ref) }
+                                UpdateRow(item: item, package: store.installedPackage(item.ref))
                             }
                         } header: {
                             if !recent.isEmpty { Text("Available") }
@@ -44,6 +44,8 @@ struct UpdatesPage: View {
                                     RecentUpdateRow(record: record, package: store.installedPackage(record.ref))
                                 }
                                 .contextMenu { PackageMenu(store: store, ref: record.ref) }
+                                // A package can be here and under Available at once.
+                                .selectionDisabled()
                             }
                         }
                     }
@@ -55,6 +57,7 @@ struct UpdatesPage: View {
                 .environment(\.defaultMinListRowHeight, 56)
                 // An updated package slides out of Available and into Updated Recently.
                 .animation(Motion.list(reduceMotion: reduceMotion), value: items.map(\.ref) + recent.map(\.ref))
+                .packageSelection($selection)
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -71,10 +74,20 @@ struct UpdatesPage: View {
                     .help("Fetch the latest package index (brew update)")
             }
             ToolbarItem {
-                Button("Update All") { store.enqueue(store.upgradeAll) }
+                let chosen = store.updatable(selection)
+                if chosen.count > 1 {
+                    Button("Update \(chosen.count) Selected") {
+                        store.update(chosen)
+                        selection = []
+                    }
                     .glassButton(prominent: true)
-                    .disabled(!store.canUpgradeAll || store.isPending(store.upgradeAll))
-                    .help(updateAllHelp)
+                    .help(chosen.contains(where: store.isOpenDuringUpdate) ? "Apps that are open update when you quit them." : "")
+                } else {
+                    Button("Update All") { store.enqueue(store.upgradeAll) }
+                        .glassButton(prominent: true)
+                        .disabled(!store.canUpgradeAll || store.isPending(store.upgradeAll))
+                        .help(updateAllHelp)
+                }
             }
         }
     }

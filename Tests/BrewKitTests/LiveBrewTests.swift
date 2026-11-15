@@ -23,6 +23,31 @@ final class LiveBrewTests: XCTestCase {
         _ = try await service.doctor()
     }
 
+    func testTapsAndBrewfilePlan() async throws {
+        let taps = try await service.tapInfo()
+        // Under the API homebrew/cask is listed but not tapped, and left out.
+        let tapped = try await service.taps()
+        if !tapped.contains("homebrew/cask") {
+            XCTAssertFalse(taps.contains { $0.name == "homebrew/cask" })
+        }
+        // A formula that doesn't exist is simply missing to bundle check.
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("LiveBrewfile-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let file = dir.appendingPathComponent("Brewfile")
+        try #"brew "this-formula-does-not-exist-caskroom""#.write(to: file, atomically: true, encoding: .utf8)
+        let plan = try await service.brewfilePlan(at: file)
+        XCTAssertEqual(plan.formulae, [.init(name: "this-formula-does-not-exist-caskroom", needed: true)])
+        // Not Ruby: brew says why, and nothing is installed.
+        try "brew \"tree\"\nthis is not ruby(\n".write(to: file, atomically: true, encoding: .utf8)
+        do {
+            _ = try await service.brewfilePlan(at: file)
+            XCTFail("expected an invalid Brewfile to fail")
+        } catch let BrewError.commandFailed(_, _, stderr) {
+            XCTAssertTrue(stderr.contains("Invalid Brewfile"), stderr)
+        }
+    }
+
     func testSearchIndexAndInfo() async throws {
         let index = try await service.searchIndex()
         XCTAssertGreaterThan(index.formulae.count, 1000)
@@ -77,6 +102,30 @@ final class LiveBrewMutationTests: XCTestCase {
         XCTAssertTrue(lines.contains { $0.text.contains("tree") }, "expected streamed install output")
         let afterInstall = try await service.installed()
         XCTAssertEqual(afterInstall.first { $0.ref == tree }?.installedOnRequest, true)
+
+        for try await _ in service.perform(.uninstall(tree)) {}
+        let afterUninstall = try await service.installed()
+        XCTAssertFalse(afterUninstall.contains { $0.ref == tree })
+    }
+
+    /// The same, through a Brewfile, as Import Brewfile does it.
+    func testBrewfileInstallsTree() async throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["CASKROOM_BREW_MUTATE"] == "1", "set CASKROOM_BREW_MUTATE=1")
+        let service = BrewService(runner: try XCTUnwrap(BrewRunner.locate()))
+        let tree = PackageRef(.formula, "tree")
+        let installed = try await service.installed()
+        try XCTSkipIf(installed.contains { $0.ref == tree }, "tree is already installed; leaving it alone")
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("LiveBrewfile-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let file = dir.appendingPathComponent("Brewfile")
+        try #"brew "tree""#.write(to: file, atomically: true, encoding: .utf8)
+
+        let before = try await service.brewfilePlan(at: file)
+        XCTAssertEqual(before.formulae, [.init(name: "tree", needed: true)])
+        for try await _ in service.perform(.installBrewfile(file)) {}
+        let after = try await service.brewfilePlan(at: file)
+        XCTAssertTrue(after.isSatisfied)
 
         for try await _ in service.perform(.uninstall(tree)) {}
         let afterUninstall = try await service.installed()

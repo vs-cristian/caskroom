@@ -126,6 +126,48 @@ public enum BrewParser {
             .filter { !$0.isEmpty }
     }
 
+    /// `brew tap-info --json --installed`. Under the API, homebrew/core and
+    /// homebrew/cask are listed but not tapped; only what's really tapped is kept.
+    public static func taps(from data: Data) throws -> [Tap] {
+        try decoder.decode([TapJSON].self, from: data)
+            .filter { $0.installed != false }
+            .map(\.tap)
+    }
+
+    /// A Brewfile's entries from `brew bundle list --tap`, `--formula`,
+    /// `--cask` and `--all` (one name per line each), and which are missing
+    /// from `brew bundle check --verbose --no-upgrade`, which is prose:
+    ///
+    ///     brew bundle can't satisfy your Brewfile's dependencies.
+    ///     → Tap someone/other needs to be tapped.
+    ///     → Cask zed needs to be installed.
+    ///     → App Final Cut Pro needs to be installed.
+    ///     Satisfy missing dependencies with `brew bundle install`.
+    public static func brewfilePlan(taps: String, formulae: String, casks: String, all: String, check: String) -> BrewfilePlan {
+        let missing = check.split(whereSeparator: \.isNewline).compactMap { line -> String? in
+            let line = line.trimmingCharacters(in: .whitespaces)
+            for arrow in ["→ ", "-> "] where line.hasPrefix(arrow) {
+                return String(line.dropFirst(arrow.count))
+            }
+            return nil
+        }
+        // "Formula tree needs to be installed.": the kind brew names, then the name.
+        func needed(_ name: String, kind: String?) -> Bool {
+            missing.contains { line in
+                guard let range = line.range(of: " \(name) needs to be") else { return false }
+                return kind.map { line[..<range.lowerBound] == $0 } ?? true
+            }
+        }
+        let (tapNames, formulaNames, caskNames) = (names(from: taps), names(from: formulae), names(from: casks))
+        let known = Set(tapNames + formulaNames + caskNames)
+        return BrewfilePlan(
+            taps: tapNames.map { .init(name: $0, needed: needed($0, kind: "Tap")) },
+            formulae: formulaNames.map { .init(name: $0, needed: needed($0, kind: "Formula")) },
+            casks: caskNames.map { .init(name: $0, needed: needed($0, kind: "Cask")) },
+            other: names(from: all).filter { !known.contains($0) }.map { .init(name: $0, needed: needed($0, kind: nil)) }
+        )
+    }
+
     private static let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -489,5 +531,23 @@ private extension Optional where Wrapped == String {
     var nonBlank: String? {
         guard let value = self?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty else { return nil }
         return value
+    }
+}
+
+private struct TapJSON: Decodable {
+    var name: String
+    var remote: String?
+    var customRemote: Bool?
+    var official: Bool?
+    var installed: Bool?
+    var formulaNames: [String]?
+    var caskTokens: [String]?
+    var lastCommit: String?
+    var path: String?
+
+    var tap: Tap {
+        Tap(name: name, remote: remote, customRemote: customRemote ?? false, official: official ?? false,
+            formulaCount: formulaNames?.count ?? 0, caskCount: caskTokens?.count ?? 0,
+            lastCommit: lastCommit, path: path)
     }
 }

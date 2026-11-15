@@ -44,7 +44,7 @@ enum LibraryFilter: String, Hashable, CaseIterable, Identifiable {
 }
 
 enum SidebarItem: Hashable {
-    case discover, updates, security, services, adopt
+    case discover, updates, security, services, taps, adopt
     case library(LibraryFilter)
 
     var title: String {
@@ -53,6 +53,7 @@ enum SidebarItem: Hashable {
         case .updates: "Updates"
         case .security: "Security"
         case .services: "Services"
+        case .taps: "Taps"
         case .adopt: "Adopt Apps"
         case let .library(filter): filter.title
         }
@@ -64,6 +65,7 @@ enum SidebarItem: Hashable {
         case .updates: "arrow.down.circle"
         case .security: "checkmark.shield"
         case .services: "gearshape.2"
+        case .taps: "spigot"
         case .adopt: "square.and.arrow.down.on.square"
         case let .library(filter): filter.symbol
         }
@@ -380,6 +382,15 @@ final class BrewStore {
     private(set) var settling: OperationRun?
     /// Set to ask for confirmation before uninstalling; RootView shows the dialog.
     var uninstallCandidate: PackageRef?
+    /// Several packages to uninstall at once, until RootView's dialog answers.
+    var bulkUninstall: BulkUninstall?
+    /// What's tapped, once the Taps page has asked; nil before, or when that failed.
+    var taps: [Tap]?
+    var tapsError: String?
+    /// Shows the Add Tap sheet.
+    var addingTap = false
+    /// The Brewfile being looked at before an import; RootView shows the sheet.
+    var brewfileImport: BrewfileImport?
     private var currentTask: Task<Void, Never>?
 
     init(service: BrewService?) {
@@ -1252,6 +1263,14 @@ final class BrewStore {
                 }
                 await loadSearchIndex()
             }
+            switch next.operation {
+            case .tap, .untap, .installBrewfile:
+                // A tap's packages join search, or leave it.
+                await loadSearchIndex()
+                if taps != nil { await loadTaps() }
+            default:
+                break
+            }
             await refresh()
             pump()
             // Off the queue: the next operation needn't wait for these.
@@ -1406,7 +1425,7 @@ extension BrewOperation {
     /// a vulnerability check is out of date after it.
     var changesFormulae: Bool {
         switch self {
-        case .install, .uninstall, .upgrade, .upgradeAll, .upgradeVulnerable, .reinstall, .revert: true
+        case .install, .uninstall, .upgrade, .upgradeAll, .upgradeVulnerable, .reinstall, .revert, .installBrewfile: true
         default: false
         }
     }

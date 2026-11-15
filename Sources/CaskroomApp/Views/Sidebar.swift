@@ -27,6 +27,7 @@ struct Sidebar: View {
             Section("System") {
                 // Badges are for what needs attention: failed services, not running ones.
                 row(.services, badge: store.services.filter { $0.status == .error }.count)
+                row(.taps)
                 // Last, and without a badge: occasionally useful, rarely urgent.
                 row(.adopt)
             }

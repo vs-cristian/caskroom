@@ -308,6 +308,75 @@ final class ParserTests: XCTestCase {
         XCTAssertFalse(VersionOrder.isComparable("abc"))
     }
 
+    func testTapsLeaveOutWhatTheAPIOnlyLists() throws {
+        // Captured from `brew tap-info --json --installed` (core's formula list cut short).
+        let taps = try BrewParser.taps(from: fixture("tap-info"))
+        XCTAssertEqual(taps.map(\.name), ["mongodb/brew"])
+        let mongo = try XCTUnwrap(taps.first)
+        XCTAssertEqual(mongo.formulaCount, 19)
+        XCTAssertEqual(mongo.caskCount, 0)
+        XCTAssertFalse(mongo.official)
+        XCTAssertFalse(mongo.customRemote)
+        XCTAssertEqual(mongo.webURL, URL(string: "https://github.com/mongodb/homebrew-brew"))
+        XCTAssertNotNil(mongo.lastCommit)
+    }
+
+    func testTapNames() {
+        XCTAssertTrue(Tap.isValidName("mongodb/brew"))
+        XCTAssertTrue(Tap.isValidName("hashicorp/homebrew-tap"))
+        XCTAssertTrue(Tap.isValidName("some_one/my.tap-2"))
+        XCTAssertFalse(Tap.isValidName("mongodb"))
+        XCTAssertFalse(Tap.isValidName("mongodb/brew/mongodb-community"))
+        XCTAssertFalse(Tap.isValidName("mongodb/"))
+        XCTAssertFalse(Tap.isValidName("mongodb/brew; rm -rf ~"))
+        XCTAssertFalse(Tap.isValidName("../brew"))
+        XCTAssertEqual(Tap(name: "a/b", remote: "git@example.com:a/b.git").webURL, nil)
+        XCTAssertEqual(Tap(name: "a/b", remote: "https://example.com/a/b.git").webURL, URL(string: "https://example.com/a/b"))
+    }
+
+    func testBrewfilePlanFollowsBundleCheck() {
+        // As `brew bundle list` and `brew bundle check --verbose --no-upgrade` print them.
+        let check = """
+        brew bundle can't satisfy your Brewfile's dependencies.
+        → Tap someone/other needs to be tapped.
+        → Cask zed needs to be installed.
+        → VSCode Extension ms-python.python needs to be installed.
+        → App Final Cut Pro needs to be installed.
+        → Formula ripgrep needs to be installed.
+        → Formula mongodb/brew/mongodb-community needs to be installed.
+        Satisfy missing dependencies with `brew bundle install`.
+        """
+        let plan = BrewParser.brewfilePlan(
+            taps: "mongodb/brew\nsomeone/other\n",
+            formulae: "tree\nripgrep\nmongodb/brew/mongodb-community\n",
+            casks: "iina\nzed\n",
+            all: "mongodb/brew\nsomeone/other\ntree\nripgrep\nmongodb/brew/mongodb-community\niina\nzed\nFinal Cut Pro\nXcode\nms-python.python\n",
+            check: check
+        )
+        XCTAssertEqual(plan.taps, [.init(name: "mongodb/brew", needed: false), .init(name: "someone/other", needed: true)])
+        XCTAssertEqual(plan.formulae.filter(\.needed).map(\.name), ["ripgrep", "mongodb/brew/mongodb-community"])
+        XCTAssertEqual(plan.casks.filter(\.needed).map(\.name), ["zed"])
+        // Names with spaces, and kinds Caskroom doesn't know, still match.
+        XCTAssertEqual(plan.other, [.init(name: "Final Cut Pro", needed: true), .init(name: "Xcode", needed: false),
+                                    .init(name: "ms-python.python", needed: true)])
+        XCTAssertFalse(plan.isSatisfied)
+    }
+
+    func testBrewfilePlanAllInstalled() {
+        let plan = BrewParser.brewfilePlan(taps: "", formulae: "tree\n", casks: "", all: "tree\n",
+                                           check: "The Brewfile's dependencies are satisfied.")
+        XCTAssertEqual(plan.formulae, [.init(name: "tree", needed: false)])
+        XCTAssertTrue(plan.isSatisfied)
+    }
+
+    func testBrewfileFormulaIsNotMistakenForACask() {
+        // The same name as a formula and a cask: only the missing kind is needed.
+        let plan = BrewParser.brewfilePlan(taps: "", formulae: "docker\n", casks: "docker\n", all: "docker\ndocker\n",
+                                           check: "→ Cask docker needs to be installed.")
+        XCTAssertEqual(plan.formulae, [.init(name: "docker", needed: false)])
+        XCTAssertEqual(plan.casks, [.init(name: "docker", needed: true)])
+    }
+
     private func fixture(_ name: String) throws -> Data {
         let url = try XCTUnwrap(Bundle.module.url(forResource: name, withExtension: "json", subdirectory: "Fixtures"))
         return try Data(contentsOf: url)
