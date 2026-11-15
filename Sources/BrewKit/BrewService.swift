@@ -106,6 +106,13 @@ public struct BrewService: Sendable {
         return firstLine.replacingOccurrences(of: "Homebrew ", with: "")
     }
 
+    /// brew's cache (`brew --cache`), where it downloads; see `BrewDownloads`.
+    public func cacheDirectory() async throws -> URL {
+        let path = try await runner.run(["--cache"]).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard path.hasPrefix("/") else { throw BrewError.decodingFailed(command: "brew --cache", message: "not a path: \(path)") }
+        return URL(fileURLWithPath: path, isDirectory: true)
+    }
+
     public func searchIndex() async throws -> SearchIndex {
         async let formulae = runner.run(["formulae"])
         async let casks = runner.run(["casks"])

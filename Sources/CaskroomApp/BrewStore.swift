@@ -223,6 +223,14 @@ final class BrewStore {
     @ObservationIgnored private var announceAfter: Date?
     var services: [ServiceEntry] = []
     var searchIndex = SearchIndex()
+    /// What the running operation has downloaded, from brew's cache, while it's
+    /// downloading; nil otherwise. See `watchDownloads`.
+    var download: DownloadProgress?
+    @ObservationIgnored private var brewCache: URL?
+    /// Download sizes by URL hash, from the servers, kept for the session.
+    @ObservationIgnored private var downloadSizes: [String: Int64] = [:]
+    /// While `loadSearchIndex` is trying, so search can say it's still loading.
+    private(set) var loadingSearchIndex = false
     /// `brew info` results for packages that aren't installed, fetched on selection.
     var infoCache: [PackageRef: Package] = [:]
     var infoErrors: [PackageRef: String] = [:]
@@ -485,13 +493,17 @@ final class BrewStore {
 
     /// Homebrew's names. A list that comes back nearly empty (brew prints
     /// little or nothing while its package data is being refreshed, as during
-    /// an update in Terminal) is retried a few times rather than believed:
-    /// Discover would filter everything out by it, and New in Homebrew would
-    /// count the whole catalog as removed, then as new.
+    /// an update in Terminal) is retried rather than believed: Discover would
+    /// filter everything out by it, and New in Homebrew would count the whole
+    /// catalog as removed, then as new. The waits grow to about two minutes in
+    /// all, since such a refresh can outlast a few seconds, and giving up left
+    /// search empty until the next update. One load at a time.
     func loadSearchIndex() async {
-        guard let service else { return }
-        for attempt in 0..<3 {
-            if attempt > 0 { try? await Task.sleep(for: .seconds(5)) }
+        guard let service, !loadingSearchIndex else { return }
+        loadingSearchIndex = true
+        defer { loadingSearchIndex = false }
+        for wait in [0, 2, 4, 8, 15, 30, 60] {
+            if wait > 0 { try? await Task.sleep(for: .seconds(wait)) }
             guard !Task.isCancelled else { return }
             if let index = try? await service.searchIndex(), isPlausible(index) {
                 searchIndex = index
@@ -1246,6 +1258,11 @@ final class BrewStore {
     }
 
     private func execute(_ run: OperationRun, with service: BrewService) async {
+        let watcher = watchDownloads(for: run.operation, with: service)
+        defer {
+            watcher.cancel()
+            download = nil
+        }
         do {
             for try await line in service.perform(run.operation) {
                 run.append(line)
@@ -1255,6 +1272,48 @@ final class BrewStore {
             run.state = Task.isCancelled ? .cancelled : .failed(failureMessage(error, run))
         }
         run.finishedAt = .now
+    }
+
+    /// Follows brew's partial downloads while `operation` runs (brew prints no
+    /// progress without a terminal; see `DownloadTracker`). A cask's size comes
+    /// from its server, so with every size known there's a fraction; a bottle's
+    /// URL isn't known here, so formulae show bytes only.
+    private func watchDownloads(for operation: BrewOperation, with service: BrewService) -> Task<Void, Never> {
+        let started = Date.now.addingTimeInterval(-2)
+        var urls: [String: URL] = [:]
+        for ref in downloadRefs(of: operation) where ref.kind == .cask {
+            if let url = package(ref)?.downloadURL { urls[BrewDownloads.urlHash(url)] = url }
+        }
+        return Task {
+            if brewCache == nil { brewCache = try? await service.cacheDirectory() }
+            guard let cache = brewCache else { return }
+            var tracker = DownloadTracker()
+            var lookedUp: Set<String> = []
+            while !Task.isCancelled {
+                let partial = await Task.detached { BrewDownloads.partial(in: cache, since: started) }.value
+                // The run may have ended during that look; its progress is already cleared.
+                guard !Task.isCancelled else { return }
+                for file in partial where !lookedUp.contains(file.urlHash) {
+                    lookedUp.insert(file.urlHash)
+                    if downloadSizes[file.urlHash] == nil, let url = urls[file.urlHash] {
+                        Task { if let size = await BrewDownloads.contentLength(of: url) { downloadSizes[file.urlHash] = size } }
+                    }
+                }
+                download = tracker.update(partial, sizes: downloadSizes)
+                try? await Task.sleep(for: .milliseconds(500))
+            }
+        }
+    }
+
+    /// The packages an operation may download.
+    private func downloadRefs(of operation: BrewOperation) -> [PackageRef] {
+        switch operation {
+        case let .install(ref), let .upgrade(ref), let .reinstall(ref): [ref]
+        case let .upgradeAll(_, casks):
+            outdated.filter { !$0.pinned && ($0.ref.kind == .formula || casks?.contains($0.ref.name) ?? true) }.map(\.ref)
+        case .upgradeVulnerable: outdated.filter { vulnerabilities(of: $0.ref) != nil }.map(\.ref)
+        default: []
+        }
     }
 
     private func failureMessage(_ error: Error, _ run: OperationRun) -> String {

@@ -167,12 +167,16 @@ struct PrimaryActionButton: View {
     var body: some View {
         Group {
             if let run = store.operation(for: ref) {
+                // While brew downloads for this run: a ring that fills, when the size is known.
+                let download = run.state == .running && store.runningOperation === run ? store.download : nil
                 status {
-                    ProgressView().controlSize(.mini)
-                    Text(run.state == .queued ? "Waiting" : run.operation.progressVerb)
+                    DownloadIndicator(fraction: download?.fraction).controlSize(.mini)
+                    Text(run.state == .queued ? "Waiting" : download != nil ? "Downloading" : run.operation.progressVerb)
                         .contentTransition(.interpolate)
                 }
+                .help(download?.summary ?? "")
                 .animation(Motion.quick, value: run.state)
+                .animation(Motion.quick, value: download != nil)
             } else if let run = finished {
                 status {
                     if run.state == .succeeded {
@@ -343,6 +347,20 @@ struct EmptyPage: View {
             }
         } description: {
             if let message { Text(message) }
+        }
+    }
+}
+
+/// A spinner, or a ring that fills while brew downloads something whose size
+/// is known.
+struct DownloadIndicator: View {
+    let fraction: Double?
+
+    var body: some View {
+        if let fraction {
+            ProgressView(value: fraction).progressViewStyle(.circular)
+        } else {
+            ProgressView()
         }
     }
 }

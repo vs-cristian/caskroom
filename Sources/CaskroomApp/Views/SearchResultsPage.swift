@@ -21,7 +21,16 @@ struct SearchResultsPage: View {
 
         Group {
             if installed.isEmpty && others.isEmpty && commands.isEmpty {
-                EmptyPage(title: "No Results", symbol: "magnifyingglass", message: "Nothing in Homebrew matches “\(query)”.")
+                // Not "No Results": without the index, nothing was searched.
+                if store.searchIndex.isEmpty && store.loadingSearchIndex {
+                    ProgressView("Loading Homebrew’s packages…")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if store.searchIndex.isEmpty {
+                    EmptyPage(title: "Can’t Search Homebrew Yet", symbol: "magnifyingglass",
+                              message: "brew didn’t list its packages. Type again to retry.")
+                } else {
+                    EmptyPage(title: "No Results", symbol: "magnifyingglass", message: "Nothing in Homebrew matches “\(query)”.")
+                }
             } else {
                 List {
                     if !installed.isEmpty {
@@ -54,6 +63,8 @@ struct SearchResultsPage: View {
             }
         }
         .navigationTitle("Search")
+        // An index that never loaded (brew busy at launch) is tried again here.
+        .task(id: query) { if store.searchIndex.isEmpty { await store.loadSearchIndex() } }
         .navigationSubtitle("“\(query)”")
     }
 

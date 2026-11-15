@@ -105,7 +105,7 @@ struct ActivityPill: View {
     @ViewBuilder
     private var icon: some View {
         if store.runningOperation != nil || (store.isRefreshing && store.operations.isEmpty) {
-            ProgressView().controlSize(.mini)
+            DownloadIndicator(fraction: store.runningOperation != nil ? store.download?.fraction : nil).controlSize(.mini)
         } else {
             // One image whose symbol is replaced, so the change animates as a symbol swap.
             let (symbol, color): (String, Color) = switch store.operations.last?.state {
@@ -197,7 +197,18 @@ private struct OperationRow: View {
     var body: some View {
         HStack(spacing: 8) {
             icon.frame(width: 16)
-            Text(run.operation.title).lineLimit(1)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(run.operation.title).lineLimit(1)
+                if let download {
+                    if let fraction = download.fraction {
+                        ProgressView(value: fraction).controlSize(.small)
+                    }
+                    Text("Downloading · \(download.summary)")
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .animation(Motion.quick, value: download != nil)
             Spacer()
             if !run.state.isFinished {
                 Button {
@@ -215,10 +226,15 @@ private struct OperationRow: View {
         .animation(Motion.standard, value: run.state)
     }
 
+    /// This run's downloads, while it's the one running and brew is downloading.
+    private var download: DownloadProgress? {
+        run.state == .running && store.runningOperation === run ? store.download : nil
+    }
+
     @ViewBuilder
     private var icon: some View {
         if run.state == .running {
-            ProgressView().controlSize(.small)
+            DownloadIndicator(fraction: download?.fraction).controlSize(.small)
         } else {
             // One image whose symbol is replaced, as in the activity pill.
             let (symbol, color): (String, Color) = switch run.state {
