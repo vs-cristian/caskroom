@@ -17,7 +17,7 @@ Items marked **(you)** need your accounts, money or eyes; the rest can be done f
 
 - [x] First commit, private repo at `vs-cristian/caskroom`
 - [x] README with the hook, features, privacy and build steps
-- [ ] Real screenshots and a short screen recording for the README: Discover, Updates, a package page, Services. Screenshots done: `make screenshots` captures the real window, light and dark, into `docs/assets`, and the README shows them in the reader's theme. Left: **(you)** the screen recording.
+- [x] Real screenshots for the README: Discover, Updates, a package page, Services. `make screenshots` captures the real window, light and dark, into `docs/assets`, and the README shows them in the reader's theme. No screen recording for now; worth adding if launch posts get little response.
 - [x] Developer ID certificate (team JH3TR8UJG6, expires 15 December 2027) and the `caskroom` notarytool profile, both in the login keychain
 - [x] Release script (`Support/release.sh`): builds, signs, notarises, publishes a GitHub Release and writes the tap's cask. Signing and notarising are proven: a rehearsal build passes Gatekeeper as "Notarized Developer ID". Publishing hasn't run.
 - [x] Tap repo `vs-cristian/homebrew-tap` (private, no cask until the first release)
