@@ -38,9 +38,14 @@ struct ActivityPill: View {
                 if flash == color { flash = nil }
             }
         }
-        .popover(isPresented: $store.showActivity, arrowEdge: .bottom) {
-            ActivityView()
-                .frame(width: 520, height: 460)
+        // Anchored to a view behind the pill rather than the pill itself: on
+        // macOS 15, a popover on a toolbar item's own view, bound to the store,
+        // sends the toolbar into a layout loop that hangs the app at launch.
+        .background {
+            Color.clear.popover(isPresented: $store.showActivity, arrowEdge: .bottom) {
+                ActivityView()
+                    .frame(width: 520, height: 460)
+            }
         }
     }
 

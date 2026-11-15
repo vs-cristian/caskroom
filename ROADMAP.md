@@ -50,5 +50,5 @@ Items marked **(you)** need your accounts, money or eyes; the rest can be done f
 
 ## Open questions
 
-- macOS 15 Sequoia is supported from 0.2.0 (15 November), with plain bordered buttons where macOS 26 has glass; not yet run on a Sequoia Mac (a Sequoia VM would do, and could double as the clean-Mac test). Apple Silicon only still shrinks the audience: revisit if launch feedback is mostly "doesn't run on my Mac".
+- macOS 15 Sequoia is supported from 0.2.0 (15 November), with plain bordered buttons where macOS 26 has glass; 0.2.0 hung at launch there (a toolbar popover layout loop), fixed after testing on a Sequoia Mac over SSH. Apple Silicon only still shrinks the audience: revisit if launch feedback is mostly "doesn't run on my Mac".
 - Homebrew now ships an official app (BrewUI). Every launch post should answer "why this one" in its first line.

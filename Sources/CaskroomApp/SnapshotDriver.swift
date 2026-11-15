@@ -10,7 +10,7 @@ import SwiftUI
 /// `CASKROOM_SNAPSHOT_SCREEN=1` captures the main window with `screencapture`
 /// instead, which needs Screen Recording permission for whatever launched it.
 /// `CASKROOM_SNAPSHOT_ONLY=<scene>,<scene>` captures only those scenes and
-/// skips the popover and Doctor captures.
+/// skips the Doctor capture.
 ///
 /// Walks the pages, writes one PNG each, then quits. Does nothing unless the
 /// variable is set, and isn't compiled into release builds: `make screenshots`
@@ -157,16 +157,16 @@ enum SnapshotDriver {
             guard only?.contains(scene.name) != false else { continue }
             try? await Task.sleep(for: .seconds(scene.wait))
             capture(window, to: output.appendingPathComponent("\(scene.name).png"))
+            // Popovers are their own windows, captured while this scene holds one open.
+            if scene.name == "9-activity",
+               let popover = NSApp.windows.first(where: { $0 !== window && $0.isVisible && $0.className.contains("Popover") }),
+               let view = popover.contentView {
+                capture(view, to: output.appendingPathComponent("9-activity-popover.png"))
+            }
         }
         if only != nil {
             NSApp.terminate(nil)
             return
-        }
-        // Popovers are their own windows. The sidebar's vibrant rows don't draw
-        // into a capture at all.
-        if let popover = NSApp.windows.first(where: { $0 !== window && $0.isVisible && $0.className.contains("Popover") }),
-           let view = popover.contentView {
-            capture(view, to: output.appendingPathComponent("9-activity-popover.png"))
         }
         // Sheets are their own windows too.
         store.doctor = .checking
