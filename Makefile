@@ -37,6 +37,8 @@ clean:
 
 # The site's screenshots (docs/assets), light and dark: the real window, captured
 # by the window server, so whatever runs make needs Screen Recording permission.
+# Kept at the capture's 2x size for Retina screens; AVIF (quality 90) makes that
+# about 100 KB a page, where PNG would be close to 1 MB.
 # scene:name pairs; the scene names are SnapshotDriver's.
 SHOTS = 1-discover:discover 18-updates-tags:updates 7-app:package 4-services:services
 screenshots:
@@ -51,7 +53,7 @@ screenshots:
 		for look in light dark; do suffix=$$([ $$look = dark ] && echo -dark); \
 			shot=.build/screenshots/$$look/$$scene.png; \
 			[ -s $$shot ] || { echo "no $$shot: does this terminal have Screen Recording permission?"; exit 1; }; \
-			sips --resampleWidth 1600 $$shot --out docs/assets/$$name$$suffix.png >/dev/null; \
-			echo "docs/assets/$$name$$suffix.png"; \
+			sips -s format avif -s formatOptions 90 $$shot --out docs/assets/$$name$$suffix.avif >/dev/null; \
+			echo "docs/assets/$$name$$suffix.avif"; \
 		done; \
 	done
