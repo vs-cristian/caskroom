@@ -2,7 +2,7 @@
 
 Caskroom is free and open source (MIT). The goal is users and GitHub stars, not revenue.
 
-**The pitch:** Homebrew, the way Apple would have built it. Lead with the App Store-style Discover page and the macOS 26 design; Adopt is the second line.
+**The pitch:** Homebrew, the way Apple would have built it. Lead with the App Store-style Discover page and the macOS 26 design. Adopt is not a differentiator: Cork has it, Taphouse sells it in its €9.99 Pro tier, and an app called Caskly appears to exist just for it. Mention it as free here, not as new.
 
 Items marked **(you)** need your accounts, money or eyes; the rest can be done from the repo.
 
@@ -11,24 +11,26 @@ Items marked **(you)** need your accounts, money or eyes; the rest can be done f
 - [x] Name: Caskroom
 - [x] Licence: MIT
 - [x] Hook chosen (above)
-- [ ] Check that no competitor has Adopt before leading with it (Cork, Applite, Taphouse, BrewUI)
+- [x] Checked whether Adopt is unique: it isn't (see the pitch)
 
 ## Phase 1: make it installable by strangers (weeks 1–3)
 
 - [x] First commit, private repo at `vs-cristian/caskroom`
 - [x] README with the hook, features, privacy and build steps
 - [ ] **(you)** Real screenshots and a short screen recording for the README: Discover, Updates, a package page, Services. The app's own snapshot captures don't render glass or the sidebar, so these have to be taken on screen.
-- [ ] **(you)** Apple Developer account ($99 a year) for a Developer ID certificate. The app is ad-hoc signed today, so Gatekeeper blocks it on anyone else's Mac.
-- [ ] Sign with Developer ID and notarise in `make app`
-- [ ] Release script: zip the app, publish a GitHub Release
-- [ ] Own tap (`vs-cristian/homebrew-tap`) so `brew install --cask vs-cristian/tap/caskroom` works and updates arrive through brew
+- [x] Developer ID certificate (team JH3TR8UJG6, expires 15 December 2027) and the `caskroom` notarytool profile, both in the login keychain
+- [x] Release script (`Support/release.sh`): builds, signs, notarises, publishes a GitHub Release and writes the tap's cask. Signing and notarising are proven: a rehearsal build passes Gatekeeper as "Notarized Developer ID". Publishing hasn't run.
+- [x] Tap repo `vs-cristian/homebrew-tap` (private, no cask until the first release)
+- [ ] **(you)** Back up the signing key: export "Caskroom Developer ID" from Keychain Access as a `.p12` and save its password in the password manager. The Copyrail one was lost this way.
+- [ ] **(you)** Run the notarised build and check that brew's Apple Events still work under the hardened runtime (uninstall a cask with a login item), plus sudo's password prompt and Adopt
+- [ ] Decide how Caskroom updates itself once it is installed from its own cask: it will show up in its own Updates list, and Update When I Quit can't work for the app doing the updating
 - [ ] Test on a clean Mac: no Homebrew, then a fresh Homebrew
 - [ ] One-page site: hook, screenshots, install command
 - [ ] Commit email: decide whether the address in git history should be public before the repo is
 
 ## Phase 2: soft launch (week 4)
 
-- [ ] **(you)** Make the repo public
+- [ ] **(you)** Make both repos public (brew can't download a release from a private repo), then cut a release so the tap has a cask
 - [ ] **(you)** Post on r/macapps, the MacPowerUsers forum, Mastodon and Bluesky
 - [ ] Fix what people report within days and say so in the thread (Taphouse shipped about 8 updates in 10 days)
 - [ ] Target: 20–50 real users, obvious bugs gone
