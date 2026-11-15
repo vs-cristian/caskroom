@@ -65,8 +65,8 @@ extension BrewOperation {
         switch self {
         case let .install(ref): "Install \(ref.name)"
         case let .adopt(ref): "Adopt \(ref.name)"
-        case let .uninstall(ref): "Uninstall \(ref.name)"
-        case let .zap(ref): "Uninstall \(ref.name) and its data"
+        case let .uninstall(ref, _): "Uninstall \(ref.name)"
+        case let .zap(ref, _): "Uninstall \(ref.name) and its data"
         case let .upgrade(ref): "Upgrade \(ref.name)"
         case let .reinstall(ref): "Reinstall \(ref.name)"
         case .upgradeAll(_, .none): "Upgrade all"
@@ -121,8 +121,8 @@ extension BrewOperation {
         switch self {
         case let .install(ref): "Installed \(ref.name)"
         case let .adopt(ref): "Adopted \(ref.name)"
-        case let .uninstall(ref): "Removed \(ref.name)"
-        case let .zap(ref): "Removed \(ref.name) and its data"
+        case let .uninstall(ref, _): "Removed \(ref.name)"
+        case let .zap(ref, _): "Removed \(ref.name) and its data"
         case let .upgrade(ref): "Updated \(ref.name)"
         case let .reinstall(ref): "Reinstalled \(ref.name)"
         case .upgradeAll(_, .none): "Updated all packages"

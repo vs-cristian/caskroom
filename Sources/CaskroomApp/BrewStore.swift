@@ -1087,6 +1087,16 @@ final class BrewStore {
         return FileManager.default.fileExists(atPath: path)
     }
 
+    /// Uninstalling `ref`, and with `zap` deleting its data too. Forced for a
+    /// cask whose app is no longer where brew put it (dragged to the Trash, or
+    /// moved aside by an uninstall that stopped partway): brew refuses those
+    /// otherwise, and the same command could never succeed on a retry.
+    func uninstallOperation(_ ref: PackageRef, zap: Bool = false) -> BrewOperation {
+        let force = ref.kind == .cask
+            && installedPackage(ref)?.appPath.map { !FileManager.default.fileExists(atPath: $0) } == true
+        return zap ? .zap(ref, force: force) : .uninstall(ref, force: force)
+    }
+
     /// The update to offer for `ref`: none while it's pinned.
     func availableUpdate(_ ref: PackageRef) -> OutdatedItem? {
         outdatedItem(ref).flatMap { $0.pinned ? nil : $0 }
@@ -1103,8 +1113,8 @@ final class BrewStore {
         }
         commands.append(.reinstall(ref))
         commands.append(package.pinned ? .unpin(ref) : .pin(ref))
-        commands.append(.uninstall(ref))
-        if package.hasZap { commands.append(.zap(ref)) }
+        commands.append(uninstallOperation(ref))
+        if package.hasZap { commands.append(uninstallOperation(ref, zap: true)) }
         if let entry = serviceEntry(ref) { commands += serviceCommands(entry) }
         return commands
     }
@@ -1333,9 +1343,21 @@ final class BrewStore {
         if run.log.contains(where: { $0.text.contains("a terminal is required") }) {
             return "This needs administrator approval, and none was given. You can also run `\(run.operation.command)` in Terminal."
         }
-        // An install found the app already there, put in place outside Homebrew.
         if run.log.contains(where: { $0.text.contains("It seems there is already an App at") }) {
-            return "The app is already in your Applications folder, installed outside Homebrew. Open its page and choose Adopt to let Homebrew manage it."
+            switch run.operation {
+            case .uninstall, .zap:
+                // brew backs the app up into its Caskroom folder before removing
+                // it; an uninstall that stopped partway left that copy behind.
+                let forced = switch run.operation {
+                case let .zap(ref, _): BrewOperation.zap(ref, force: true).command
+                case let .uninstall(ref, _): BrewOperation.uninstall(ref, force: true).command
+                default: run.operation.command
+                }
+                return "A copy of the app that Homebrew kept during an earlier uninstall is in the way. Run `\(forced)` in Terminal to replace it and finish."
+            default:
+                // An install found the app already there, put in place outside Homebrew.
+                return "The app is already in your Applications folder, installed outside Homebrew. Open its page and choose Adopt to let Homebrew manage it."
+            }
         }
         if run.blockedByAppManagement {
             let name = run.operation.ref.flatMap { package($0)?.title ?? $0.name } ?? "the app"

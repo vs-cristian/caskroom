@@ -21,10 +21,13 @@ public enum BrewOperation: Hashable, Sendable {
     /// image, say), so Homebrew manages it from then on. brew refuses unless the
     /// app is the same version as the cask's.
     case adopt(PackageRef)
-    case uninstall(PackageRef)
+    /// `force` is for a cask whose app is already gone (dragged to the Trash,
+    /// or moved aside by an uninstall that stopped partway): plain uninstall
+    /// refuses both ("source … is not there", "already an App at …").
+    case uninstall(PackageRef, force: Bool = false)
     /// Uninstalls a cask and deletes what its `zap` stanza lists: settings,
     /// caches, support files.
-    case zap(PackageRef)
+    case zap(PackageRef, force: Bool = false)
     case upgrade(PackageRef)
     /// Uninstalls and installs the current version again: mends a broken
     /// install, and lets brew catch up with an app that updated itself.
@@ -79,8 +82,8 @@ public enum BrewOperation: Hashable, Sendable {
         switch self {
         case let .install(ref): return ["install", ref.kind.flag, ref.name]
         case let .adopt(ref): return ["install", ref.kind.flag, "--adopt", ref.name]
-        case let .uninstall(ref): return ["uninstall", ref.kind.flag, ref.name]
-        case let .zap(ref): return ["uninstall", ref.kind.flag, "--zap", ref.name]
+        case let .uninstall(ref, force): return ["uninstall", ref.kind.flag] + (force ? ["--force"] : []) + [ref.name]
+        case let .zap(ref, force): return ["uninstall", ref.kind.flag, "--zap"] + (force ? ["--force"] : []) + [ref.name]
         case let .upgrade(ref): return ["upgrade", ref.kind.flag, ref.name]
         case let .reinstall(ref): return ["reinstall", ref.kind.flag, ref.name]
         case let .upgradeAll(greedy, _): return ["upgrade"] + (greedy ? ["--greedy-auto-updates"] : [])
@@ -117,7 +120,7 @@ public enum BrewOperation: Hashable, Sendable {
     /// The package this operation acts on, if it acts on one.
     public var ref: PackageRef? {
         switch self {
-        case let .install(ref), let .adopt(ref), let .uninstall(ref), let .zap(ref), let .upgrade(ref),
+        case let .install(ref), let .adopt(ref), let .uninstall(ref, _), let .zap(ref, _), let .upgrade(ref),
              let .reinstall(ref), let .pin(ref), let .unpin(ref), let .revert(ref, _, _):
             return ref
         case let .service(_, name):

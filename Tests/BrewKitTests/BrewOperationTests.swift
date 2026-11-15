@@ -10,6 +10,9 @@ final class BrewOperationTests: XCTestCase {
         XCTAssertEqual(BrewOperation.upgradeAll(greedy: true).arguments, ["upgrade", "--greedy-auto-updates"])
         XCTAssertEqual(BrewOperation.adopt(PackageRef(.cask, "iina")).arguments, ["install", "--cask", "--adopt", "iina"])
         XCTAssertEqual(BrewOperation.zap(PackageRef(.cask, "iina")).arguments, ["uninstall", "--cask", "--zap", "iina"])
+        // A cask whose app is already gone: brew refuses it without --force.
+        XCTAssertEqual(BrewOperation.uninstall(PackageRef(.cask, "iina"), force: true).arguments, ["uninstall", "--cask", "--force", "iina"])
+        XCTAssertEqual(BrewOperation.zap(PackageRef(.cask, "iina"), force: true).command, "brew uninstall --cask --zap --force iina")
         XCTAssertEqual(BrewOperation.cleanup.arguments, ["cleanup"])
         XCTAssertEqual(BrewOperation.dumpBrewfile(URL(fileURLWithPath: "/tmp/Brewfile")).arguments,
                        ["bundle", "dump", "--force", "--file=/tmp/Brewfile"])

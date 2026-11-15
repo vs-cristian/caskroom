@@ -61,9 +61,9 @@ struct RootView: View {
             presenting: store.uninstallCandidate
         ) { ref in
             if store.dependents(of: ref).isEmpty {
-                Button("Uninstall", role: .destructive) { store.enqueue(.uninstall(ref)) }
+                Button("Uninstall", role: .destructive) { store.enqueue(store.uninstallOperation(ref)) }
                 if store.package(ref)?.hasZap == true {
-                    Button("Uninstall and Delete App Data", role: .destructive) { store.enqueue(.zap(ref)) }
+                    Button("Uninstall and Delete App Data", role: .destructive) { store.enqueue(store.uninstallOperation(ref, zap: true)) }
                 }
             } else {
                 Button("OK", role: .cancel) {}
