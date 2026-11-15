@@ -183,7 +183,7 @@ struct PrimaryActionButton: View {
                         Image(systemName: "checkmark")
                             .fontWeight(.bold)
                             .foregroundStyle(.green)
-                            .transition(.symbolEffect(.drawOn))
+                            .transition(.drawOn)
                     } else {
                         FailedMark()
                     }
@@ -274,19 +274,11 @@ struct PrimaryActionButton: View {
     }
 
     /// A capsule of glass, prominent on a package's page.
-    @ViewBuilder
     private func glass(_ control: some View) -> some View {
-        if prominent {
-            control
-                .buttonStyle(.glassProminent)
-                .buttonBorderShape(.capsule)
-                .fontWeight(.semibold)
-        } else {
-            control
-                .buttonStyle(.glass)
-                .buttonBorderShape(.capsule)
-                .fontWeight(.semibold)
-        }
+        control
+            .glassButton(prominent: prominent)
+            .buttonBorderShape(.capsule)
+            .fontWeight(.semibold)
     }
 }
 
@@ -316,7 +308,7 @@ struct DrawnSymbol: View {
             Image(systemName: systemName).hidden()
             if drawn || !drawsIn {
                 Image(systemName: systemName)
-                    .transition(.symbolEffect(.drawOn))
+                    .transition(.drawOn)
             }
         }
         .task {
@@ -413,7 +405,7 @@ struct CommandButton: View {
                     .foregroundStyle(copied ? AnyShapeStyle(.green) : AnyShapeStyle(.secondary))
             }
         }
-        .buttonStyle(.glass)
+        .glassButton()
         .buttonBorderShape(.capsule)
         .help("Copy “\(command)”")
     }

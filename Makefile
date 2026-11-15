@@ -8,9 +8,20 @@ HARDENED = --options runtime --timestamp
 ENTITLED = --entitlements Support/Caskroom.entitlements
 endif
 
-.PHONY: release app run clean screenshots
+# The app runs on macOS 15, but macOS draws Liquid Glass only for apps built
+# with the macOS 26 SDK or later, which it reads from the SDK version stamped in
+# the binary. SwiftPM stamps the deployment target there (15.0), so macOS 26+
+# would show the pre-glass look; this stamps the SDK actually used.
+MINIMUM_MACOS = 15.0
+LINK_SDK = -Xlinker -platform_version -Xlinker macos -Xlinker $(MINIMUM_MACOS) -Xlinker $(shell xcrun --show-sdk-version)
+
+.PHONY: release debug app run clean screenshots
 release:
-	swift build -c release --arch arm64
+	swift build -c release --arch arm64 $(LINK_SDK)
+
+# A debug build that looks as the release does (plain `swift build` gets no glass).
+debug:
+	swift build $(LINK_SDK)
 
 app: release
 	rm -rf $(APP)
@@ -23,7 +34,7 @@ ifdef VERSION
 		-c "Set :CFBundleVersion $(VERSION)" $(APP)/Contents/Info.plist
 endif
 	xcrun actool $(CURDIR)/Support/AppIcon.icon --compile $(CURDIR)/$(APP)/Contents/Resources \
-		--platform macosx --minimum-deployment-target 26.0 --app-icon AppIcon \
+		--platform macosx --minimum-deployment-target $(MINIMUM_MACOS) --app-icon AppIcon \
 		--output-partial-info-plist $(CURDIR)/.build/AppIcon.plist --errors >/dev/null
 	codesign --force $(HARDENED) -s "$(SIGN)" $(APP)/Contents/Helpers/CaskroomAskpass
 	codesign --force $(HARDENED) $(ENTITLED) -s "$(SIGN)" $(APP)
@@ -41,8 +52,7 @@ clean:
 # about 100 KB a page, where PNG would be close to 1 MB.
 # scene:name pairs; the scene names are SnapshotDriver's.
 SHOTS = 1-discover:discover 18-updates-tags:updates 7-app:package 4-services:services
-screenshots:
-	swift build
+screenshots: debug
 	rm -rf .build/screenshots
 	for look in light dark; do \
 		CASKROOM_SNAPSHOT_SCREEN=1 CASKROOM_APPEARANCE=$$look \

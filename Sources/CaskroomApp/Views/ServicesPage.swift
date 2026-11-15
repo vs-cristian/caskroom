@@ -112,7 +112,7 @@ struct ServiceRunButton: View {
         Button { store.enqueue(command) } label: {
             Text(entry.status.isRunning ? "Stop" : "Run").frame(minWidth: 48)
         }
-        .buttonStyle(.glass)
+        .glassButton()
         .disabled(store.isBusy(entry.ref))
         .help(command.command)
     }

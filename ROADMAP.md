@@ -25,7 +25,7 @@ Items marked **(you)** need your accounts, money or eyes; the rest can be done f
 - [x] **(you)** Run the notarised build and check that brew's Apple Events still work under the hardened runtime (uninstall a cask with a login item), plus sudo's password prompt and Adopt. All passed on 15 November: `session-manager-plugin` (a `.pkg`) installed and uninstalled through Caskroom's password dialog, then through Touch ID once `sudo_local` enabled it; uninstalling Rectangle raised the System Events prompt and removed its login item; adopting Chrome was first refused by macOS (no prompt, Caskroom's App Management message and button appeared, Chrome untouched) and worked once Caskroom was allowed there.
 - [x] Caskroom updates itself through brew: its own Updates row offers Update and Relaunch (or Update When I Quit), handed to a detached helper that runs `brew upgrade --cask caskroom` once the app has quit, then reopens it; the next launch shows the log in Activity. Unit-tested against a fake brew; not yet run against a real release.
 - [ ] **(you)** Check self-update end to end once there are two releases: install the older one from the tap, Update and Relaunch, and see whether macOS asks for App Management permission (the helper outlives the app that is its responsible process)
-- [ ] Test on a clean Mac: no Homebrew, then a fresh Homebrew
+- [ ] Test on a clean Mac: no Homebrew, then a fresh Homebrew. Make it a macOS 15 VM, to see the Sequoia fallbacks too
 - [x] One-page site: plain HTML/CSS in `docs/` (Apple product-page style, light and dark, real window screenshots, checked at phone width; preview with `python3 -m http.server -d docs`). Live at https://vs-cristian.github.io/caskroom/ since 15 November, GitHub Pages from `main`'s `docs/`; every push to it redeploys. A custom domain can come later.
 - [x] Commit email: history rewritten to the GitHub noreply address, set in this repo's git config and used by `release.sh` for the tap commit. The tap's README commit was rewritten too. Both pushed.
 
@@ -50,5 +50,5 @@ Items marked **(you)** need your accounts, money or eyes; the rest can be done f
 
 ## Open questions
 
-- macOS 26 and Apple Silicon only shrinks the audience but is also the pitch. Revisit if launch feedback is mostly "doesn't run on my Mac".
+- macOS 15 Sequoia is supported from the release after 0.1.0, with plain bordered buttons where macOS 26 has glass; not yet run on a Sequoia Mac (a Sequoia VM would do, and could double as the clean-Mac test). Apple Silicon only still shrinks the audience: revisit if launch feedback is mostly "doesn't run on my Mac".
 - Homebrew now ships an official app (BrewUI). Every launch post should answer "why this one" in its first line.

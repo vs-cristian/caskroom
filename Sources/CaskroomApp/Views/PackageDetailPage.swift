@@ -171,7 +171,7 @@ private struct PackageDetailContent: View {
                 .labelStyle(.iconOnly)
         }
         .menuIndicator(.hidden)
-        .buttonStyle(.glass)
+        .glassButton()
         .buttonBorderShape(.circle)
         .controlSize(.large)
         .fixedSize()
@@ -227,7 +227,7 @@ private struct PackageDetailContent: View {
                         }
                     }
                 }
-                .buttonStyle(.glass)
+                .glassButton()
                 .buttonBorderShape(.capsule)
                 .controlSize(.small)
                 .help(installed ? "\(ref.name) is installed" : "")
@@ -444,7 +444,7 @@ private struct DeprecationCard: View {
                                 Text(replacement.name)
                             }
                         }
-                        .buttonStyle(.glass)
+                        .glassButton()
                         .buttonBorderShape(.capsule)
                         .controlSize(.small)
                     }
@@ -512,7 +512,7 @@ private struct ServiceCard: View {
                         .labelStyle(.iconOnly)
                 }
                 .menuIndicator(.hidden)
-                .buttonStyle(.glass)
+                .glassButton()
                 .buttonBorderShape(.circle)
                 .fixedSize()
                 .help("More")
@@ -548,7 +548,7 @@ private struct CommandChips: View {
                 ForEach(showsAll ? commands : Array(commands.prefix(Self.shownAtFirst)), id: \.self) { command in
                     Button(command) { copyToPasteboard(command) }
                         .font(.callout.monospaced())
-                        .buttonStyle(.glass)
+                        .glassButton()
                         .buttonBorderShape(.capsule)
                         .controlSize(.small)
                         .help("Copy “\(command)”")

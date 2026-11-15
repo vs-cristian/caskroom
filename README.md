@@ -1,6 +1,6 @@
 # Caskroom
 
-Homebrew, the way Apple would have built it: a native macOS 26 app for browsing, installing and updating everything `brew` manages.
+Homebrew, the way Apple would have built it: a native Mac app for browsing, installing and updating everything `brew` manages.
 
 Caskroom is a front end to the `brew` command you already have. It runs `brew`, reads its JSON, and shows you the exact command behind every action. It never reimplements Homebrew or touches its files.
 
@@ -27,7 +27,7 @@ Caskroom is a front end to the `brew` command you already have. It runs `brew`, 
 
 ## Requirements
 
-- macOS 26 or later on Apple Silicon
+- macOS 15 Sequoia or later on Apple Silicon (Liquid Glass on macOS 26 and later)
 - [Homebrew](https://brew.sh)
 
 ## Install

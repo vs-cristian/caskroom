@@ -72,7 +72,7 @@ struct UpdatesPage: View {
             }
             ToolbarItem {
                 Button("Update All") { store.enqueue(store.upgradeAll) }
-                    .buttonStyle(.glassProminent)
+                    .glassButton(prominent: true)
                     .disabled(!store.canUpgradeAll || store.isPending(store.upgradeAll))
                     .help(updateAllHelp)
             }
@@ -242,7 +242,7 @@ private struct CleanupBanner: View {
                     ProgressView().controlSize(.small)
                 } else {
                     Button("Clean Up") { store.enqueue(.cleanup) }
-                        .buttonStyle(.glass)
+                        .glassButton()
                         .help(BrewOperation.cleanup.command)
                 }
             }

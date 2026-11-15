@@ -5,10 +5,11 @@ import SwiftUI
 /// The toolbar's status pill, like Xcode's activity view: what brew is doing now,
 /// or how the last command went. Click for the full log.
 ///
-/// It draws its own Liquid Glass (RootView hides the toolbar's shared glass behind
-/// it) so the glass can move: the pill stretches to fit its title, queued commands
-/// split off as a droplet and merge back as the queue drains, and the glass
-/// briefly tints green or red when a command finishes.
+/// On macOS 26 it draws its own Liquid Glass (RootView hides the toolbar's shared
+/// glass behind it) so the glass can move: the pill stretches to fit its title,
+/// queued commands split off as a droplet and merge back as the queue drains, and
+/// the glass briefly tints green or red when a command finishes. macOS 15 gets
+/// filled capsules with the same content and tint.
 struct ActivityPill: View {
     @Environment(BrewStore.self) private var store
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -18,49 +19,7 @@ struct ActivityPill: View {
 
     var body: some View {
         @Bindable var store = store
-        GlassEffectContainer(spacing: 6) {
-            HStack(spacing: 6) {
-                Button {
-                    store.showActivity.toggle()
-                } label: {
-                    HStack(spacing: 7) {
-                        icon.frame(width: 14, height: 14)
-                        Text(title)
-                            .lineLimit(1)
-                            .contentTransition(.interpolate)
-                    }
-                    .font(.callout)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 7)
-                    .frame(minWidth: 160, maxWidth: 380)
-                    .contentShape(Capsule())
-                }
-                .buttonStyle(.plain)
-                .glassEffect(.regular.tint(flash?.opacity(0.3)).interactive(), in: Capsule())
-                .glassEffectID("pill", in: glass)
-                .help("Show activity (⇧⌘L)")
-
-                if queued > 0 {
-                    Button {
-                        store.showActivity = true
-                    } label: {
-                        Text("+\(queued)")
-                            .font(.callout.weight(.semibold).monospacedDigit())
-                            .foregroundStyle(.secondary)
-                            .contentTransition(.numericText(value: Double(queued)))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 7)
-                            .contentShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .glassEffect(.regular.interactive(), in: Capsule())
-                    .glassEffectID("queue", in: glass)
-                    // Without motion the droplet simply appears; with it, it pulls out of the pill.
-                    .glassEffectTransition(reduceMotion ? .identity : .matchedGeometry)
-                    .help(queued == 1 ? "1 command waiting" : "\(queued) commands waiting")
-                }
-            }
-        }
+        pills
         .animation(Motion.liquid(reduceMotion: reduceMotion), value: title)
         .animation(Motion.liquid(reduceMotion: reduceMotion), value: queued > 0)
         .animation(Motion.quick, value: queued)
@@ -83,6 +42,74 @@ struct ActivityPill: View {
             ActivityView()
                 .frame(width: 520, height: 460)
         }
+    }
+
+    @ViewBuilder
+    private var pills: some View {
+        if #available(macOS 26, *) {
+            GlassEffectContainer(spacing: 6) {
+                HStack(spacing: 6) {
+                    pill
+                        .glassEffect(.regular.tint(flash?.opacity(0.3)).interactive(), in: Capsule())
+                        .glassEffectID("pill", in: glass)
+                    if queued > 0 {
+                        queue
+                            .glassEffect(.regular.interactive(), in: Capsule())
+                            .glassEffectID("queue", in: glass)
+                            // Without motion the droplet simply appears; with it, it pulls out of the pill.
+                            .glassEffectTransition(reduceMotion ? .identity : .matchedGeometry)
+                    }
+                }
+            }
+        } else {
+            // macOS 15 has no glass: a filled capsule, as Xcode 16's activity view.
+            HStack(spacing: 6) {
+                pill
+                    .background(Capsule().fill(flash?.opacity(0.25) ?? .clear))
+                    .background(Capsule().fill(.quaternary))
+                if queued > 0 {
+                    queue
+                        .background(Capsule().fill(.quaternary))
+                        .transition(.move(from: .leading, reduceMotion: reduceMotion))
+                }
+            }
+        }
+    }
+
+    private var pill: some View {
+        Button {
+            store.showActivity.toggle()
+        } label: {
+            HStack(spacing: 7) {
+                icon.frame(width: 14, height: 14)
+                Text(title)
+                    .lineLimit(1)
+                    .contentTransition(.interpolate)
+            }
+            .font(.callout)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .frame(minWidth: 160, maxWidth: 380)
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .help("Show activity (⇧⌘L)")
+    }
+
+    private var queue: some View {
+        Button {
+            store.showActivity = true
+        } label: {
+            Text("+\(queued)")
+                .font(.callout.weight(.semibold).monospacedDigit())
+                .foregroundStyle(.secondary)
+                .contentTransition(.numericText(value: Double(queued)))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .help(queued == 1 ? "1 command waiting" : "\(queued) commands waiting")
     }
 
     private var queued: Int {

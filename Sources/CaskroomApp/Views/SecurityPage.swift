@@ -72,7 +72,7 @@ struct SecurityPage: View {
                 }
                 ToolbarItem {
                     Button("Fix") { store.enqueue(.upgradeVulnerable) }
-                        .buttonStyle(.glassProminent)
+                        .glassButton(prominent: true)
                         .disabled(store.fixableVulnerabilities.isEmpty || store.isPending(.upgradeVulnerable))
                         .help("Update the vulnerable formulae that have an update (\(BrewOperation.upgradeVulnerable.command)). The new version isn't guaranteed to fix every vulnerability.")
                 }
@@ -223,7 +223,7 @@ private struct OptIn: View {
             Text("Caskroom can ask OSV.dev, Google's open vulnerability database, about the formulae you have installed, and update the ones with a fix. This sends their names and versions to OSV.dev each time it checks. Apps (casks) aren't checked.")
         } actions: {
             Button("Turn On") { store.checksVulnerabilities = true }
-                .buttonStyle(.glassProminent)
+                .glassButton(prominent: true)
                 .help("Runs brew vulns now and after each change to your formulae")
         }
     }

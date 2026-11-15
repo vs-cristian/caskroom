@@ -59,7 +59,7 @@ cask "caskroom" do
   homepage "https://github.com/$REPO"
 
   depends_on arch: :arm64
-  depends_on macos: :tahoe
+  depends_on macos: :sequoia
 
   app "Caskroom.app"
 

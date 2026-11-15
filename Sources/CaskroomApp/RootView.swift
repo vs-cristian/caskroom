@@ -37,11 +37,17 @@ struct RootView: View {
         .searchable(text: $store.searchText, placement: .sidebar, prompt: "Search Homebrew")
         .searchFocused($searchFocused)
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                ActivityPill()
+            if #available(macOS 26, *) {
+                ToolbarItem(placement: .principal) {
+                    ActivityPill()
+                }
+                // The pill draws its own glass so it can morph.
+                .sharedBackgroundVisibility(.hidden)
+            } else {
+                ToolbarItem(placement: .principal) {
+                    ActivityPill()
+                }
             }
-            // The pill draws its own glass so it can morph.
-            .sharedBackgroundVisibility(.hidden)
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             LoadErrorBanner()

@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "Caskroom",
-    platforms: [.macOS(.v26)],
+    platforms: [.macOS(.v15)],
     targets: [
         // Talks to the brew CLI and parses its JSON. No UI imports, unit-testable.
         .target(
