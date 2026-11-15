@@ -107,14 +107,16 @@ code { font-family: var(--mono); font-size: 0.9em; letter-spacing: 0; }
 
 /* Hero */
 
-.hero { text-align: center; padding-top: 72px; }
-.hero-icon { width: 144px; height: 144px; margin: 0 auto 20px; }
-.kicker { margin: 0 0 8px; font: 600 21px/1.19 var(--display); letter-spacing: 0.011em; }
+.hero { text-align: center; padding-top: 80px; }
+.hero-icon { width: 96px; height: 96px; margin: 0 auto 14px; }
+.kicker { margin: 0 0 12px; font: 600 21px/1.19 var(--display); letter-spacing: 0.011em; }
 h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; }
 h1 {
-  font-size: clamp(44px, 8.4vw, 80px); line-height: 1.05; letter-spacing: -0.015em;
-  max-width: 900px; margin: 0 auto;
+  font-size: clamp(40px, 6.2vw, 64px); line-height: 1.08; letter-spacing: -0.015em;
+  margin: 0 auto; text-wrap: balance;
 }
+/* Two-tone headline: the name in ink, the promise in grey. */
+h1 .soft { color: var(--steel); }
 .lede {
   max-width: 640px; margin: 24px auto 0;
   font: 400 21px/1.38 var(--display); letter-spacing: 0.011em; color: var(--slate);
@@ -122,7 +124,7 @@ h1 {
 
 .install { margin: 36px auto 0; display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .command {
-  display: inline-flex; align-items: center; gap: 4px; max-width: 100%;
+  display: inline-flex; align-items: center; gap: 16px; max-width: 100%;
   padding: 6px 6px 6px 20px; border-radius: 980px;
   background: var(--code); box-shadow: 0 0 0 1px var(--edge);
   font: 400 15px/1 var(--mono); letter-spacing: 0;
@@ -146,12 +148,36 @@ h1 {
 .facts span { white-space: nowrap; }
 .facts span + span::before { content: "·"; margin: 0 8px; color: var(--steel); }
 
-.stage { margin: 56px auto 0; max-width: 1200px; padding: 0 var(--gutter); }
+.stage { margin: 64px auto 0; max-width: 1240px; padding: 0 var(--gutter); }
+
+/* The window on a desktop: a warm wallpaper in the icon's honey and amber,
+   drawn with gradients, framed like Apple's media (large corners, no shadow). */
+.desktop {
+  border-radius: 32px; overflow: hidden;
+  padding: clamp(20px, 5.5vw, 72px) clamp(12px, 5vw, 64px);
+  background:
+    radial-gradient(70% 90% at 0% 100%, #f29a2e 0%, rgba(242, 154, 46, 0) 70%),
+    radial-gradient(60% 80% at 100% 100%, #d9532b 0%, rgba(217, 83, 43, 0) 70%),
+    radial-gradient(55% 60% at 80% 0%, #ffd27a 0%, rgba(255, 210, 122, 0) 70%),
+    radial-gradient(60% 60% at 15% 5%, #fff1d6 0%, rgba(255, 241, 214, 0) 70%),
+    linear-gradient(160deg, #ffe2b0 0%, #f7b765 55%, #e5793a 100%);
+}
+@media (prefers-color-scheme: dark) {
+  .desktop {
+    background:
+      radial-gradient(70% 90% at 0% 100%, #d9700f 0%, rgba(217, 112, 15, 0) 70%),
+      radial-gradient(60% 80% at 100% 100%, #a3261a 0%, rgba(163, 38, 26, 0) 70%),
+      radial-gradient(55% 60% at 85% 0%, #b8640f 0%, rgba(184, 100, 15, 0) 70%),
+      radial-gradient(60% 60% at 15% 0%, #4a2208 0%, rgba(74, 34, 8, 0) 70%),
+      linear-gradient(160deg, #2b1205 0%, #6b300a 55%, #4a110c 100%);
+  }
+}
+@media (max-width: 640px) { .desktop { border-radius: 22px; } }
 
 /* Screenshots are whole windows captured by the window server: their own
    corners and shadow on a transparent background, so no frame here. */
 .shot { width: 100%; }
-.stage .shot { max-width: 1100px; margin: 0 auto; }
+.stage .shot { max-width: 1060px; margin: 0 auto; }
 
 /* Sections */
 
