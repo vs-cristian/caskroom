@@ -4,7 +4,7 @@
 <dict>
     <key>CFBundleName</key><string>Caskroom</string>
     <key>CFBundleDisplayName</key><string>Caskroom</string>
-    <key>CFBundleIdentifier</key><string>club.iscout.caskroom</string>
+    <key>CFBundleIdentifier</key><string>io.github.vs-cristian.caskroom</string>
     <key>CFBundleVersion</key><string>1</string>
     <key>CFBundleShortVersionString</key><string>0.1.0</string>
     <key>CFBundleExecutable</key><string>Caskroom</string>

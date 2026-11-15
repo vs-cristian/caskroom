@@ -26,8 +26,7 @@ final class LogoStore {
     @ObservationIgnored private var running = 0
     @ObservationIgnored private var waiting: [CheckedContinuation<Void, Never>] = []
     @ObservationIgnored private let directory: URL = {
-        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let directory = caches.appending(path: "club.iscout.caskroom/Logos", directoryHint: .isDirectory)
+        let directory = AppFolders.caches.appending(path: "Logos", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         return directory
     }()

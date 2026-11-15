@@ -717,10 +717,7 @@ final class BrewStore {
         return operation == .upgrade(ref) || operation == .reinstall(ref)
     }
 
-    private static let selfUpgradeDirectory: URL = {
-        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        return caches.appending(path: "club.iscout.caskroom")
-    }()
+    private static let selfUpgradeDirectory = AppFolders.caches
 
     /// As Caskroom quits: hands an update of itself, from Update and Relaunch
     /// or Update When I Quit, to a helper that runs once it's gone. Only Update

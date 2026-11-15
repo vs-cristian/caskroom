@@ -124,10 +124,7 @@ struct KnownPackages: Codable {
     /// (it adds a few dozen a week) but a list that was incomplete, before or now.
     static let largestChange = 1000
 
-    private static let file: URL = {
-        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return support.appending(path: "club.iscout.caskroom/KnownPackages.json")
-    }()
+    private static let file = AppFolders.support.appending(path: "KnownPackages.json")
 
     static func load() -> KnownPackages? {
         guard let data = try? Data(contentsOf: file) else { return nil }
@@ -165,13 +162,10 @@ struct KnownPackages: Codable {
     }
 }
 
-/// Downloads kept in ~/Library/Caches/club.iscout.caskroom while fresh. Offline,
-/// a stale copy beats none.
+/// Downloads kept in `AppFolders.caches` while fresh. Offline, a stale copy
+/// beats none.
 enum DownloadCache {
-    private static let directory: URL = {
-        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        return caches.appending(path: "club.iscout.caskroom", directoryHint: .isDirectory)
-    }()
+    private static let directory = AppFolders.caches
 
     static func data(_ name: String, maxAge: TimeInterval, fetch: () async throws -> Data) async throws -> Data {
         let file = directory.appending(path: name)

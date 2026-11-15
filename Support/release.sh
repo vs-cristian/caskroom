@@ -64,10 +64,10 @@ cask "caskroom" do
   app "Caskroom.app"
 
   zap trash: [
-    "~/Library/Application Support/club.iscout.caskroom",
-    "~/Library/Caches/club.iscout.caskroom",
-    "~/Library/HTTPStorages/club.iscout.caskroom",
-    "~/Library/Preferences/club.iscout.caskroom.plist",
+    "~/Library/Application Support/io.github.vs-cristian.caskroom",
+    "~/Library/Caches/io.github.vs-cristian.caskroom",
+    "~/Library/HTTPStorages/io.github.vs-cristian.caskroom",
+    "~/Library/Preferences/io.github.vs-cristian.caskroom.plist",
   ]
 end
 EOF

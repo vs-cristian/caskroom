@@ -49,10 +49,7 @@ enum UpdateHistory {
     /// More than Updated Recently shows, so the Activity popover has a past.
     static let limit = 200
 
-    private static let file: URL = {
-        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return support.appending(path: "club.iscout.caskroom/UpdateHistory.json")
-    }()
+    private static let file = AppFolders.support.appending(path: "UpdateHistory.json")
 
     static func load() -> [UpdateRecord] {
         guard let data = try? Data(contentsOf: file) else { return [] }
