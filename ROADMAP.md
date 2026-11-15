@@ -26,12 +26,12 @@ Items marked **(you)** need your accounts, money or eyes; the rest can be done f
 - [x] Caskroom updates itself through brew: its own Updates row offers Update and Relaunch (or Update When I Quit), handed to a detached helper that runs `brew upgrade --cask caskroom` once the app has quit, then reopens it; the next launch shows the log in Activity. Unit-tested against a fake brew; not yet run against a real release.
 - [ ] **(you)** Check self-update end to end once there are two releases: install the older one from the tap, Update and Relaunch, and see whether macOS asks for App Management permission (the helper outlives the app that is its responsible process)
 - [ ] Test on a clean Mac: no Homebrew, then a fresh Homebrew
-- [ ] One-page site: built as plain HTML/CSS in `docs/` (Apple product-page style, light and dark, real window screenshots, checked at phone width; preview with `python3 -m http.server -d docs`). Left: publish with GitHub Pages from `docs/` once the repo is public, and pick a domain or keep `vs-cristian.github.io/caskroom`.
+- [x] One-page site: plain HTML/CSS in `docs/` (Apple product-page style, light and dark, real window screenshots, checked at phone width; preview with `python3 -m http.server -d docs`). Live at https://vs-cristian.github.io/caskroom/ since 15 November, GitHub Pages from `main`'s `docs/`; every push to it redeploys. A custom domain can come later.
 - [x] Commit email: history rewritten to the GitHub noreply address, set in this repo's git config and used by `release.sh` for the tap commit. The tap's README commit was rewritten too. Both pushed.
 
 ## Phase 2: soft launch (week 4)
 
-- [ ] **(you)** Make both repos public (brew can't download a release from a private repo), then cut a release so the tap has a cask
+- [ ] **(you)** Make both repos public (brew can't download a release from a private repo), then cut a release so the tap has a cask. `caskroom` went public on 15 November for the site (history checked first: no secrets, only the noreply email); the tap is still private, and until 0.1.0 is out the site's install command fails.
 - [ ] **(you)** Post on r/macapps, the MacPowerUsers forum, Mastodon and Bluesky
 - [ ] Fix what people report within days and say so in the thread (Taphouse shipped about 8 updates in 10 days)
 - [ ] Target: 20–50 real users, obvious bugs gone
