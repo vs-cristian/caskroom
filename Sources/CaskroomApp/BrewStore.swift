@@ -65,7 +65,7 @@ enum SidebarItem: Hashable {
         case .updates: "arrow.down.circle"
         case .security: "checkmark.shield"
         case .services: "gearshape.2"
-        case .taps: "spigot"
+        case .taps: "puzzlepiece.extension"
         case .adopt: "square.and.arrow.down.on.square"
         case let .library(filter): filter.symbol
         }

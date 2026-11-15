@@ -87,7 +87,7 @@ struct BrewfileImportSheet: View {
         List {
             group("Taps", plan.taps) { name in
                 HStack(spacing: 10) {
-                    Image(systemName: "spigot.fill").foregroundStyle(.brown).frame(width: 24)
+                    Image(systemName: "puzzlepiece.extension.fill").foregroundStyle(.gray).frame(width: 24)
                     Text(name)
                 }
             }

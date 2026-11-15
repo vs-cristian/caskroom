@@ -14,7 +14,7 @@ struct TapsPage: View {
                 if taps.isEmpty && store.pendingTaps.isEmpty {
                     EmptyPage(
                         title: "No Taps",
-                        symbol: "spigot",
+                        symbol: "puzzlepiece.extension",
                         message: "A tap adds formulae and apps from outside Homebrew's own collection, such as a company's or a developer's. Add one by its name, like mongodb/brew."
                     )
                 } else {
@@ -154,11 +154,11 @@ private struct PendingTapRow: View {
 
 private struct TapIcon: View {
     var body: some View {
-        Image(systemName: "spigot.fill")
+        Image(systemName: "puzzlepiece.extension.fill")
             .font(.system(size: 15))
             .foregroundStyle(.white)
             .frame(width: 32, height: 32)
-            .background(Color.brown.gradient, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .background(Color.gray.gradient, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 }
 
