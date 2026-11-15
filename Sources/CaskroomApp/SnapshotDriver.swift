@@ -7,11 +7,24 @@ import SwiftUI
 ///
 ///     CASKROOM_SNAPSHOT_DIR=/tmp/shots CASKROOM_APPEARANCE=dark .build/debug/CaskroomApp
 ///
+/// `CASKROOM_SNAPSHOT_SCREEN=1` captures the main window with `screencapture`
+/// instead, which needs Screen Recording permission for whatever launched it.
+/// `CASKROOM_SNAPSHOT_ONLY=<scene>,<scene>` captures only those scenes and
+/// skips the popover and Doctor captures.
+///
 /// Walks the pages, writes one PNG each, then quits. Does nothing unless the
-/// variable is set.
+/// variable is set, and isn't compiled into release builds: `make screenshots`
+/// and the commands above use the debug build.
 @MainActor
 enum SnapshotDriver {
     static func runIfRequested(store: BrewStore) async {
+        #if DEBUG
+        await run(store: store)
+        #endif
+    }
+
+    #if DEBUG
+    private static func run(store: BrewStore) async {
         let env = ProcessInfo.processInfo.environment
         guard let dir = env["CASKROOM_SNAPSHOT_DIR"] else { return }
         let output = URL(fileURLWithPath: dir)
@@ -23,9 +36,18 @@ enum SnapshotDriver {
             try? await Task.sleep(for: .milliseconds(500))
         }
         guard let window = NSApp.windows.first(where: { $0.isVisible && $0.contentView != nil }) else { return }
+        if env["CASKROOM_SNAPSHOT_SCREEN"] == "1" {
+            // An inactive window draws dimmed: grey controls and selection.
+            NSApp.activate(ignoringOtherApps: true)
+            window.makeKeyAndOrderFront(nil)
+        }
+        // CASKROOM_SNAPSHOT_ONLY=1-discover,4-services captures just those scenes.
+        let only = env["CASKROOM_SNAPSHOT_ONLY"].map { Set($0.split(separator: ",").map(String.init)) }
         // The first page as launched, before anything resizes or re-creates it.
-        try? await Task.sleep(for: .seconds(1))
-        capture(window, to: output.appendingPathComponent("0-launch.png"))
+        if only?.contains("0-launch") != false {
+            try? await Task.sleep(for: .seconds(1))
+            capture(window, to: output.appendingPathComponent("0-launch.png"))
+        }
         window.setContentSize(NSSize(width: 1180, height: 760))
 
         // Nothing is outdated on a fresh machine; show what the page looks like with work to do.
@@ -94,7 +116,7 @@ enum SnapshotDriver {
             ("5b-dependency", 4, { store.path = NavigationPath(firstDependency.map { [$0] } ?? []) }),
             ("6-apps", 2, { store.sidebar = .library(.apps) }),
             ("6b-dependencies", 2, { store.sidebar = .library(.dependencies) }),
-            ("7-app", 4, { store.path = NavigationPath(firstApp.map { [$0] } ?? []) }),
+            ("7-app", 4, { store.sidebar = .library(.apps); store.path = NavigationPath(firstApp.map { [$0] } ?? []) }),
             ("8-search", 2, { store.path = NavigationPath(); store.searchText = "wget" }),
             ("12-attention", 2, { store.path = NavigationPath(); store.searchText = ""; store.sidebar = .library(.attention) }),
             ("15-security-opt-in", 2, { store.sidebar = .security }),
@@ -128,9 +150,16 @@ enum SnapshotDriver {
             }),
         ]
         for scene in scenes {
+            // A skipped scene still applies: later ones build on its state
+            // (Security's findings tag the rows in 18-updates-tags).
             scene.apply()
+            guard only?.contains(scene.name) != false else { continue }
             try? await Task.sleep(for: .seconds(scene.wait))
             capture(window, to: output.appendingPathComponent("\(scene.name).png"))
+        }
+        if only != nil {
+            NSApp.terminate(nil)
+            return
         }
         // Popovers are their own windows. The sidebar's vibrant rows don't draw
         // into a capture at all.
@@ -154,6 +183,16 @@ enum SnapshotDriver {
     }
 
     private static func capture(_ window: NSWindow, to url: URL) {
+        // With Screen Recording permission, the window server's own image: glass,
+        // the sidebar's vibrancy and the window shadow included.
+        if ProcessInfo.processInfo.environment["CASKROOM_SNAPSHOT_SCREEN"] == "1" {
+            let shot = Process()
+            shot.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
+            shot.arguments = ["-x", "-l", String(window.windowNumber), url.path]
+            try? shot.run()
+            shot.waitUntilExit()
+            return
+        }
         if let view = window.contentView?.superview { capture(view, to: url) }
     }
 
@@ -162,4 +201,5 @@ enum SnapshotDriver {
         view.cacheDisplay(in: view.bounds, to: rep)
         try? rep.representation(using: .png, properties: [:])?.write(to: url)
     }
+    #endif
 }

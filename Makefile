@@ -8,7 +8,7 @@ HARDENED = --options runtime --timestamp
 ENTITLED = --entitlements Support/Caskroom.entitlements
 endif
 
-.PHONY: release app run clean
+.PHONY: release app run clean screenshots
 release:
 	swift build -c release --arch arm64
 
@@ -34,3 +34,24 @@ run: app
 
 clean:
 	rm -rf .build build
+
+# The site's screenshots (docs/assets), light and dark: the real window, captured
+# by the window server, so whatever runs make needs Screen Recording permission.
+# scene:name pairs; the scene names are SnapshotDriver's.
+SHOTS = 1-discover:discover 18-updates-tags:updates 7-app:package 4-services:services
+screenshots:
+	swift build
+	rm -rf .build/screenshots
+	for look in light dark; do \
+		CASKROOM_SNAPSHOT_SCREEN=1 CASKROOM_APPEARANCE=$$look \
+		CASKROOM_SNAPSHOT_ONLY=$$(echo $(SHOTS) | tr ' ' '\n' | cut -d: -f1 | paste -sd, -) \
+		CASKROOM_SNAPSHOT_DIR=$(CURDIR)/.build/screenshots/$$look .build/debug/CaskroomApp 2>/dev/null; \
+	done
+	@for pair in $(SHOTS); do scene=$${pair%%:*}; name=$${pair##*:}; \
+		for look in light dark; do suffix=$$([ $$look = dark ] && echo -dark); \
+			shot=.build/screenshots/$$look/$$scene.png; \
+			[ -s $$shot ] || { echo "no $$shot: does this terminal have Screen Recording permission?"; exit 1; }; \
+			sips --resampleWidth 1600 $$shot --out docs/assets/$$name$$suffix.png >/dev/null; \
+			echo "docs/assets/$$name$$suffix.png"; \
+		done; \
+	done
