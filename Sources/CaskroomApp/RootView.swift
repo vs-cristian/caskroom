@@ -23,6 +23,8 @@ struct RootView: View {
         return NavigationSplitView {
             Sidebar()
                 .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 280)
+                // No toggle button: View ▸ Hide Sidebar (⌃⌘S) still collapses it.
+                .toolbar(removing: .sidebarToggle)
         } detail: {
             NavigationStack(path: $store.path) {
                 page
