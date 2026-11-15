@@ -19,7 +19,7 @@ Items marked **(you)** need your accounts, money or eyes; the rest can be done f
 - [x] README with the hook, features, privacy and build steps
 - [x] Real screenshots for the README: Discover, Updates, a package page, Services. `make screenshots` captures the real window, light and dark, into `docs/assets`, and the README shows them in the reader's theme. No screen recording for now; worth adding if launch posts get little response.
 - [x] Developer ID certificate (team JH3TR8UJG6, expires 15 December 2027) and the `caskroom` notarytool profile, both in the login keychain
-- [x] Release script (`Support/release.sh`): builds, signs, notarises, publishes a GitHub Release and writes the tap's cask. Signing and notarising are proven: a rehearsal build passes Gatekeeper as "Notarized Developer ID". Publishing hasn't run.
+- [x] Release script (`Support/release.sh`): builds, signs, notarises, publishes a GitHub Release and writes the tap's cask. Ran in full for 0.1.0.
 - [x] Tap repo `vs-cristian/homebrew-tap` (private, no cask until the first release)
 - [x] **(you)** Back up the signing key: `~/.appstoreconnect/private_keys/caskroom-developer-id-JH3TR8UJG6.p12` (certificate and key, verified), password in the password manager. Marked done on your word; no copy off this Mac was found from here.
 - [x] **(you)** Run the notarised build and check that brew's Apple Events still work under the hardened runtime (uninstall a cask with a login item), plus sudo's password prompt and Adopt. All passed on 15 November: `session-manager-plugin` (a `.pkg`) installed and uninstalled through Caskroom's password dialog, then through Touch ID once `sudo_local` enabled it; uninstalling Rectangle raised the System Events prompt and removed its login item; adopting Chrome was first refused by macOS (no prompt, Caskroom's App Management message and button appeared, Chrome untouched) and worked once Caskroom was allowed there.
@@ -31,7 +31,7 @@ Items marked **(you)** need your accounts, money or eyes; the rest can be done f
 
 ## Phase 2: soft launch (week 4)
 
-- [ ] **(you)** Make both repos public (brew can't download a release from a private repo), then cut a release so the tap has a cask. `caskroom` went public on 15 November for the site (history checked first: no secrets, only the noreply email); the tap is still private, and until 0.1.0 is out the site's install command fails.
+- [x] **(you)** Make both repos public (brew can't download a release from a private repo), then cut a release so the tap has a cask. Both public on 15 November (history checked first: no secrets, only the noreply email). [0.1.0](https://github.com/vs-cristian/caskroom/releases/tag/v0.1.0) released the same day by `Support/release.sh`; `brew install --cask vs-cristian/tap/caskroom` installed it on this Mac, Gatekeeper accepts it as "Notarized Developer ID" and the first open shows macOS's usual "downloaded from the internet" prompt, nothing worse.
 - [ ] **(you)** Post on r/macapps, the MacPowerUsers forum, Mastodon and Bluesky
 - [ ] Fix what people report within days and say so in the thread (Taphouse shipped about 8 updates in 10 days)
 - [ ] Target: 20–50 real users, obvious bugs gone

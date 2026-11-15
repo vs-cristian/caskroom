@@ -23,7 +23,7 @@ CASKROOM_BREW_MUTATE=1 swift test --filter LiveBrewMutationTests   # installs th
 Support/release.sh --dry-run 0.2.0                                  # build/Caskroom-0.2.0.zip + build/caskroom.rb, nothing published
 ```
 
-`Support/release.sh <version>` (with `SIGN` and `NOTARY_PROFILE`) is the whole release: `make app` with a Developer ID identity (hardened runtime, `Support/Caskroom.entitlements`), notarise, GitHub Release on `vs-cristian/caskroom`, cask pushed to `vs-cristian/homebrew-tap`. It refuses to publish an ad-hoc build. `SIGN="Developer ID Application: CORINA BOTNARI (JH3TR8UJG6)" NOTARY_PROFILE=caskroom` are this Mac's values; with both set, `--dry-run` signs, notarises and staples without publishing. The publishing half (GitHub Release, tap push) hasn't run yet.
+`Support/release.sh <version>` (with `SIGN` and `NOTARY_PROFILE`) is the whole release: `make app` with a Developer ID identity (hardened runtime, `Support/Caskroom.entitlements`), notarise, GitHub Release on `vs-cristian/caskroom`, cask pushed to `vs-cristian/homebrew-tap`. It refuses to publish an ad-hoc build. `SIGN="Developer ID Application: CORINA BOTNARI (JH3TR8UJG6)" NOTARY_PROFILE=caskroom` are this Mac's values; with both set, `--dry-run` signs, notarises and staples without publishing.
 
 Use `make run` to check app behaviour: it launches through LaunchServices with a bare PATH, as Finder does.
 
