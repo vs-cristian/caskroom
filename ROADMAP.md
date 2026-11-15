@@ -23,7 +23,8 @@ Items marked **(you)** need your accounts, money or eyes; the rest can be done f
 - [x] Tap repo `vs-cristian/homebrew-tap` (private, no cask until the first release)
 - [ ] **(you)** Back up the signing key. Exported to `~/.appstoreconnect/private_keys/caskroom-developer-id-JH3TR8UJG6.p12` (certificate and key, verified); password in the password manager. Left: copy the file somewhere off this Mac. The Copyrail one was lost this way.
 - [ ] **(you)** Run the notarised build and check that brew's Apple Events still work under the hardened runtime (uninstall a cask with a login item), plus sudo's password prompt and Adopt
-- [ ] Decide how Caskroom updates itself once it is installed from its own cask: it will show up in its own Updates list, and Update When I Quit can't work for the app doing the updating
+- [x] Caskroom updates itself through brew: its own Updates row offers Update and Relaunch (or Update When I Quit), handed to a detached helper that runs `brew upgrade --cask caskroom` once the app has quit, then reopens it; the next launch shows the log in Activity. Unit-tested against a fake brew; not yet run against a real release.
+- [ ] **(you)** Check self-update end to end once there are two releases: install the older one from the tap, Update and Relaunch, and see whether macOS asks for App Management permission (the helper outlives the app that is its responsible process)
 - [ ] Test on a clean Mac: no Homebrew, then a fresh Homebrew
 - [ ] One-page site: hook, screenshots, install command
 - [ ] Commit email: history rewritten to the GitHub noreply address, set in this repo's git config and used by `release.sh` for the tap commit. Pushed. Left: rewrite the tap's README commit (it uses another Gmail address)

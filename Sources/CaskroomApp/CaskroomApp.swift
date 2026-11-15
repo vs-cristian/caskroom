@@ -138,12 +138,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         alert.addButton(withTitle: "Stop and Quit").hasDestructiveAction = true
         alert.addButton(withTitle: "Cancel")
-        guard alert.runModal() == .alertFirstButtonReturn else { return .terminateCancel }
+        guard alert.runModal() == .alertFirstButtonReturn else {
+            store.selfUpgrade = nil
+            return .terminateCancel
+        }
         Task {
             await store.stopAll()
             sender.reply(toApplicationShouldTerminate: true)
         }
         return .terminateLater
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        store.handOffSelfUpgrade()
     }
 }
 

@@ -126,6 +126,9 @@ private struct UpdateRow: View {
                     }
                     if item.pinned {
                         Tag("Pinned", color: .orange)
+                    } else if item.ref == store.selfRef {
+                        Tag("This App", color: .orange)
+                            .help("Updating Caskroom quits it, and it opens again once Homebrew is done, so Update All leaves it out.")
                     } else if store.isOpenDuringUpdate(item.ref) {
                         Tag("Open", color: .orange)
                             .help("\(package?.title ?? item.ref.name) is open, and Homebrew would replace it while it runs, so Update All leaves it for later. Update it now, or when you quit it.")

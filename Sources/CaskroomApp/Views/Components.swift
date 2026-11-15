@@ -193,6 +193,17 @@ struct PrimaryActionButton: View {
                             Text("After Quit")
                         }
                         .help("Updates when you quit \(package.title)")
+                    } else if ref == store.selfRef {
+                        // Caskroom itself: brew can only replace it once it has quit.
+                        glass(Menu("Update") {
+                            Button("Update and Relaunch") { store.enqueue(.upgrade(ref)) }
+                            Button("Update When I Quit") { store.updateOnQuit(ref) }
+                        } primaryAction: {
+                            store.enqueue(.upgrade(ref))
+                        }
+                        .menuStyle(.button))
+                        .fixedSize()
+                        .help("Caskroom quits, Homebrew updates it, and it opens again. Or choose Update When I Quit.")
                     } else if store.isOpenDuringUpdate(ref) {
                         // Open, and brew would replace it as it runs: offer to wait.
                         glass(Menu("Update") {

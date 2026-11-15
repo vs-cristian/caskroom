@@ -200,7 +200,9 @@ struct PackageMenu: View {
         let installed = store.installedPackage(ref)
         if let package = installed {
             if let item = store.availableUpdate(ref) {
-                Button("Update to \(item.currentVersion)") { store.enqueue(.upgrade(ref)) }
+                Button(ref == store.selfRef ? "Update to \(item.currentVersion) and Relaunch" : "Update to \(item.currentVersion)") {
+                    store.enqueue(.upgrade(ref))
+                }
                     .disabled(busy)
                 if store.updatesOnQuit(ref) {
                     Button("Don't Update When I Quit") { store.updateOnQuit(ref, false) }
@@ -222,7 +224,7 @@ struct PackageMenu: View {
             }
             .disabled(busy)
             // Mends a broken install, and catches brew up with an app that updated itself.
-            Button("Reinstall") { store.enqueue(.reinstall(ref)) }
+            Button(ref == store.selfRef ? "Reinstall and Relaunch" : "Reinstall") { store.enqueue(.reinstall(ref)) }
                 .disabled(busy)
                 .help(BrewOperation.reinstall(ref).command)
         } else if store.isAdoptable(ref) {

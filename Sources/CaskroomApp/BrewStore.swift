@@ -298,6 +298,12 @@ final class BrewStore {
         }
     }
 
+    /// Caskroom's own cask, when this copy is the one brew installed: brew
+    /// replaces its bundle, so it can't update through the queue.
+    private(set) var selfRef: PackageRef?
+    /// Set by Update and Relaunch until Caskroom quits.
+    var selfUpgrade: BrewOperation?
+
     /// Whether Updates also lists casks that updated themselves since brew
     /// installed them. Off: brew already lists one whose app is really behind,
     /// and the others only need its records to catch up.
@@ -365,6 +371,7 @@ final class BrewStore {
 
     func start() async {
         guard let service else { return }
+        pickUpSelfUpgrade()
         async let refresh: Void = refresh()
         // Discover checks its names against the index: analytics can name
         // packages Homebrew has since removed, which would fail a whole `brew info`.
@@ -421,6 +428,7 @@ final class BrewStore {
         switch results.0 {
         case let .success(value):
             self.installed = value
+            selfRef = Self.ownCask(in: value)
             dropStaleCatalog()
         case let .failure(error): errors.append(error.localizedDescription)
         }
@@ -651,6 +659,7 @@ final class BrewStore {
     /// An installed app that's open now, whose cask doesn't quit it before
     /// upgrading: brew would replace it while it runs.
     func isOpenDuringUpdate(_ ref: PackageRef) -> Bool {
+        if ref == selfRef { return true }
         guard let package = installedPackage(ref), package.kind == .cask, !package.quitsApp,
               let path = package.appPath else { return false }
         return runningApps.contains(path)
@@ -690,6 +699,79 @@ final class BrewStore {
     private static func loadUpdatesOnQuit() -> Set<PackageRef> {
         let saved = UserDefaults.standard.stringArray(forKey: "UpdateOnQuit") ?? []
         return Set(saved.compactMap(PackageRef.init(savedString:)))
+    }
+
+    // MARK: Updating Caskroom
+
+    /// The installed cask whose app is this one.
+    private static func ownCask(in installed: [Package]) -> PackageRef? {
+        let bundle = Bundle.main.bundleURL.resolvingSymlinksInPath().path
+        return installed.first { package in
+            package.kind == .cask && package.appPath.map { URL(fileURLWithPath: $0).resolvingSymlinksInPath().path } == bundle
+        }?.ref
+    }
+
+    /// Whether `operation` would have brew replace Caskroom's own bundle.
+    private func replacesSelf(_ operation: BrewOperation) -> Bool {
+        guard let ref = selfRef else { return false }
+        return operation == .upgrade(ref) || operation == .reinstall(ref)
+    }
+
+    private static let selfUpgradeDirectory: URL = {
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        return caches.appending(path: "club.iscout.caskroom")
+    }()
+
+    /// As Caskroom quits: hands an update of itself, from Update and Relaunch
+    /// or Update When I Quit, to a helper that runs once it's gone. Only Update
+    /// and Relaunch opens it again.
+    func handOffSelfUpgrade() {
+        var operation = selfUpgrade
+        let relaunch = operation != nil
+        if operation == nil, let ref = selfRef, updatesOnQuit.contains(ref), availableUpdate(ref) != nil {
+            operation = .upgrade(ref)
+        }
+        guard let operation, let ref = operation.ref, let service,
+              let package = installedPackage(ref), let path = package.appPath else { return }
+        UserDefaults.standard.set([
+            "operation": operation == .reinstall(ref) ? "reinstall" : "upgrade",
+            "ref": ref.savedString,
+            "from": package.installedVersions.last ?? "",
+        ], forKey: "SelfUpgrade")
+        do {
+            try SelfUpgrade(runner: service.runner, directory: Self.selfUpgradeDirectory)
+                .start(operation.steps[0], waitingFor: getpid(), relaunch: relaunch ? path : nil)
+        } catch {
+            UserDefaults.standard.removeObject(forKey: "SelfUpgrade")
+            NSLog("Couldn't start updating Caskroom: \(error)")
+        }
+    }
+
+    /// At launch, how an update handed off at the last quit went, as a finished
+    /// run in Activity (opened if it failed) and in the update history.
+    private func pickUpSelfUpgrade() {
+        guard let saved = UserDefaults.standard.dictionary(forKey: "SelfUpgrade") as? [String: String] else { return }
+        UserDefaults.standard.removeObject(forKey: "SelfUpgrade")
+        guard let service, let ref = saved["ref"].flatMap(PackageRef.init(savedString:)) else { return }
+        let operation: BrewOperation = saved["operation"] == "reinstall" ? .reinstall(ref) : .upgrade(ref)
+        let outcome = SelfUpgrade(runner: service.runner, directory: Self.selfUpgradeDirectory).pickUp()
+        let run = OperationRun(operation)
+        for line in outcome?.log ?? [] { run.append(LogLine(.stdout, line)) }
+        run.finishedAt = outcome?.finishedAt ?? .now
+        switch outcome?.exitStatus {
+        case 0:
+            run.state = .succeeded
+        case let status?:
+            let error = BrewError.commandFailed(command: operation.command, exitCode: status, stderr: "")
+            run.state = .failed(failureMessage(error, run))
+        case nil:
+            run.state = .failed(outcome == nil
+                ? "Caskroom quit to update, but Homebrew didn't run."
+                : "Homebrew stopped before it finished updating Caskroom.")
+        }
+        operations.append(run)
+        if case .failed = run.state { showActivity = true }
+        if let from = saved["from"], !from.isEmpty { unconfirmedUpdates.append((run, [ref: from])) }
     }
 
     // MARK: Reverting
@@ -1078,6 +1160,12 @@ final class BrewStore {
     }
 
     func enqueue(_ operation: BrewOperation, automatic: Bool = false) {
+        // brew would replace the running app: quit, and let the helper do it.
+        if replacesSelf(operation) {
+            selfUpgrade = operation
+            NSApp.terminate(nil)
+            return
+        }
         guard !isPending(operation) else { return }
         operations.append(OperationRun(operation, automatic: automatic))
         if !automatic { Notifier.requestAuthorization() }
