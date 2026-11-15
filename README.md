@@ -4,6 +4,8 @@ Homebrew, the way Apple would have built it: a native macOS 26 app for browsing,
 
 Caskroom is a front end to the `brew` command you already have. It runs `brew`, reads its JSON, and shows you the exact command behind every action. It never reimplements Homebrew or touches its files.
 
+**[vs-cristian.github.io/caskroom](https://vs-cristian.github.io/caskroom/)**
+
 <p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/discover-dark.avif"><img src="docs/assets/discover.avif" alt="Caskroom's Discover page: an updates banner above the most installed apps this month, each with Install, Update or Adopt."></picture></p>
 
 ## What it does
@@ -30,7 +32,13 @@ Caskroom is a front end to the `brew` command you already have. It runs `brew`, 
 
 ## Install
 
-There is no signed download yet. Until there is, build it from source, which needs Xcode 26 or later:
+```sh
+brew install --cask vs-cristian/tap/caskroom
+```
+
+Caskroom then keeps itself up to date through brew, like any other app it manages. The download is also on the [releases page](https://github.com/vs-cristian/caskroom/releases).
+
+To build it from source instead, which needs Xcode 26 or later:
 
 ```sh
 git clone https://github.com/vs-cristian/caskroom.git
