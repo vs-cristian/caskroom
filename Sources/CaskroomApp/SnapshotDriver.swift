@@ -83,12 +83,13 @@ enum SnapshotDriver {
                 disabling: Deprecation(reason: "repo_archived", replacement: PackageRef(.formula, "mise"), date: .now.addingTimeInterval(90 * 86400))
             ))
         }
-        // One service running at login, one that failed.
+        // One service running at login, one that failed. No user: the row would
+        // show this Mac's account name, and these end up on the site.
         if store.services.count >= 2, !store.services.contains(where: \.status.isRunning), env["CASKROOM_SNAPSHOT_FAKE_UPDATES"] != "0" {
             let (a, b) = (store.services[0], store.services[1])
-            store.services[0] = ServiceEntry(name: a.name, status: .started, user: NSUserName(), file: a.file, pid: 4321,
+            store.services[0] = ServiceEntry(name: a.name, status: .started, user: nil, file: a.file, pid: 4321,
                                              registered: true, logPath: a.logPath, errorLogPath: a.errorLogPath)
-            store.services[1] = ServiceEntry(name: b.name, status: .error, user: NSUserName(), file: b.file, exitCode: 78,
+            store.services[1] = ServiceEntry(name: b.name, status: .error, user: nil, file: b.file, exitCode: 78,
                                              registered: true, logPath: b.logPath, errorLogPath: b.errorLogPath)
         }
 
