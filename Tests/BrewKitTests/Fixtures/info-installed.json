@@ -1,0 +1,1081 @@
+{
+ "formulae": [
+  {
+   "name": "abseil",
+   "full_name": "abseil",
+   "tap": "homebrew/core",
+   "oldnames": [],
+   "aliases": [],
+   "versioned_formulae": [],
+   "desc": "C++ Common Libraries",
+   "license": "Apache-2.0",
+   "homepage": "https://abseil.io",
+   "versions": {
+    "stable": "20260817.0",
+    "head": "HEAD",
+    "bottle": true
+   },
+   "urls": {
+    "stable": {
+     "url": "https://github.com/abseil/abseil-cpp/archive/refs/tags/20260817.0.tar.gz",
+     "tag": null,
+     "revision": null,
+     "using": null,
+     "checksum": "f7e05179df39c45434cad433f5783840bb3788ef322976f9138bc6b72b3a107d"
+    },
+    "head": {
+     "url": "https://github.com/abseil/abseil-cpp.git",
+     "branch": "master",
+     "using": null
+    }
+   },
+   "patches": [],
+   "local_patch_checksums": {},
+   "revision": 0,
+   "version_scheme": 0,
+   "compatibility_version": 3,
+   "autobump": true,
+   "no_autobump_message": null,
+   "skip_livecheck": false,
+   "bottle": {
+    "stable": {
+     "rebuild": 1,
+     "root_url": "https://ghcr.io/v2/homebrew/core",
+     "files": {
+      "arm64_golden_gate": {
+       "cellar": ":any",
+       "url": "https://ghcr.io/v2/homebrew/core/abseil/blobs/sha256:2646bd89795f0c7a87af89580cd3f14a29eef006ab76fed189eb1e70250c9fbc",
+       "sha256": "2646bd89795f0c7a87af89580cd3f14a29eef006ab76fed189eb1e70250c9fbc"
+      }
+     }
+    }
+   },
+   "pour_bottle_only_if": null,
+   "keg_only": false,
+   "keg_only_reason": null,
+   "options": [],
+   "build_dependencies": [
+    "cmake",
+    "googletest"
+   ],
+   "dependencies": [],
+   "test_dependencies": [
+    "cmake"
+   ],
+   "recommended_dependencies": [],
+   "optional_dependencies": [],
+   "no_linkage_dependencies": [],
+   "uses_from_macos": [],
+   "uses_from_macos_bounds": [],
+   "requirements": [],
+   "conflicts_with": [],
+   "conflicts_with_reasons": [],
+   "link_overwrite": [],
+   "caveats": null,
+   "installed": [
+    {
+     "sbom": "/opt/homebrew/Cellar/abseil/20260817.0/sbom.spdx.json",
+     "version": "20260817.0",
+     "used_options": [],
+     "built_as_bottle": true,
+     "poured_from_bottle": true,
+     "time": 1794568132,
+     "runtime_dependencies": [],
+     "installed_on_request": false
+    }
+   ],
+   "linked_keg": "20260817.0",
+   "pinned": false,
+   "outdated": false,
+   "deprecated": false,
+   "deprecation_date": null,
+   "deprecation_reason": null,
+   "deprecation_replacement_formula": null,
+   "deprecation_replacement_cask": null,
+   "deprecate_args": null,
+   "disabled": false,
+   "disable_date": null,
+   "disable_reason": null,
+   "disable_replacement_formula": null,
+   "disable_replacement_cask": null,
+   "disable_args": null,
+   "post_install_steps": [],
+   "post_install_defined": false,
+   "service": null,
+   "tap_git_head": "c42a64d2630cef3f8b9951b7013cd4ce1b6f2f8b",
+   "ruby_source_path": "Formula/a/abseil.rb",
+   "ruby_source_checksum": {
+    "sha256": "593fc7901a8949808a470c6b505b095cb0944367e64b2db876ea73661e59b3e7"
+   }
+  },
+  {
+   "name": "mysql@8.4",
+   "full_name": "mysql@8.4",
+   "tap": "homebrew/core",
+   "oldnames": [],
+   "aliases": [],
+   "versioned_formulae": [
+    "mysql@9.7",
+    "mysql@8.0"
+   ],
+   "desc": "Open source relational database management system",
+   "license": "GPL-2.0-only WITH Universal-FOSS-exception-1.0",
+   "homepage": "https://github.com/mysql/mysql-server",
+   "versions": {
+    "stable": "8.4.13",
+    "head": null,
+    "bottle": true
+   },
+   "urls": {
+    "stable": {
+     "url": "https://cdn.mysql.com/Downloads/MySQL-8.4/mysql-8.4.13.tar.gz",
+     "tag": null,
+     "revision": null,
+     "using": null,
+     "checksum": "f6ddc7f7fb6462bab8b533b13c06af3fff57fa9ca12259b81ab13cd9930b9d58"
+    }
+   },
+   "patches": [
+    {
+     "strip": "p1",
+     "url": "https://salsa.debian.org/mariadb-team/mysql/-/raw/ac6576612c0afddccebf939fccedacc3b97db567/debian/patches/support-openssl4.patch",
+     "sha256": "fd0eb6d47ce5aaef43e58240d9884d04b1ee30fd3c57395b405d9400ae136a02"
+    },
+    {
+     "strip": "p1",
+     "file": "Patches/mysql/remove-boost-check.diff"
+    }
+   ],
+   "local_patch_checksums": {
+    "Patches/mysql/remove-boost-check.diff": "bbc1ab33918bd02a183951f3244c60bb53017274d53b22951118a51b9c29f8ea"
+   },
+   "revision": 1,
+   "version_scheme": 0,
+   "compatibility_version": null,
+   "autobump": true,
+   "no_autobump_message": null,
+   "skip_livecheck": false,
+   "bottle": {
+    "stable": {
+     "rebuild": 0,
+     "root_url": "https://ghcr.io/v2/homebrew/core",
+     "files": {
+      "arm64_golden_gate": {
+       "cellar": "/opt/homebrew/Cellar",
+       "url": "https://ghcr.io/v2/homebrew/core/mysql/8.4/blobs/sha256:c325155097307355e3a59478b8c42d59c4187183b16d1768285788d4a401c388",
+       "sha256": "c325155097307355e3a59478b8c42d59c4187183b16d1768285788d4a401c388"
+      }
+     }
+    }
+   },
+   "pour_bottle_only_if": null,
+   "keg_only": true,
+   "keg_only_reason": {
+    "reason": ":versioned_formula",
+    "explanation": ""
+   },
+   "options": [],
+   "build_dependencies": [
+    "bison",
+    "cmake",
+    "pkgconf"
+   ],
+   "dependencies": [
+    "abseil",
+    "icu4c@79",
+    "lz4",
+    "openssl@4",
+    "protobuf",
+    "zlib-ng-compat",
+    "zstd"
+   ],
+   "test_dependencies": [],
+   "recommended_dependencies": [],
+   "optional_dependencies": [],
+   "no_linkage_dependencies": [],
+   "uses_from_macos": [
+    "curl",
+    "cyrus-sasl",
+    "libedit"
+   ],
+   "uses_from_macos_bounds": [
+    {},
+    {},
+    {}
+   ],
+   "requirements": [],
+   "conflicts_with": [],
+   "conflicts_with_reasons": [],
+   "link_overwrite": [],
+   "caveats": "A \"/etc/my.cnf\" or \"/etc/mysql/my.cnf\" from another install may interfere\nwith a Homebrew-built server starting up correctly.\n\nWe've installed your MySQL database without a root password. To secure it run:\n    mysql_secure_installation\n\nMySQL is configured to only allow connections from localhost by default\n\nTo connect run:\n    mysql -u root\n",
+   "installed": [
+    {
+     "sbom": "/opt/homebrew/Cellar/mysql@8.4/8.4.13_1/sbom.spdx.json",
+     "version": "8.4.13_1",
+     "used_options": [],
+     "built_as_bottle": true,
+     "poured_from_bottle": true,
+     "time": 1794568134,
+     "runtime_dependencies": [
+      {
+       "full_name": "abseil",
+       "version": "20260817.0",
+       "revision": 0,
+       "bottle_rebuild": 1,
+       "pkg_version": "20260817.0",
+       "declared_directly": true,
+       "compatibility_version": 3
+      },
+      {
+       "full_name": "icu4c@79",
+       "version": "79.1",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "79.1",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "lz4",
+       "version": "1.11.1",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "1.11.1",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "ca-certificates",
+       "version": "2026-11-05",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "2026-11-05",
+       "declared_directly": false,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "openssl@4",
+       "version": "4.1.0",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "4.1.0",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "protobuf",
+       "version": "36.2",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "36.2",
+       "declared_directly": true,
+       "compatibility_version": 7
+      },
+      {
+       "full_name": "zlib-ng-compat",
+       "version": "2.3.3",
+       "revision": 1,
+       "bottle_rebuild": 1,
+       "pkg_version": "2.3.3_1",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "xz",
+       "version": "5.8.4",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "5.8.4",
+       "declared_directly": false,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "zstd",
+       "version": "1.5.7",
+       "revision": 1,
+       "bottle_rebuild": 0,
+       "pkg_version": "1.5.7_1",
+       "declared_directly": true,
+       "compatibility_version": 1
+      }
+     ],
+     "installed_on_request": true
+    }
+   ],
+   "linked_keg": "8.4.13_1",
+   "pinned": false,
+   "outdated": false,
+   "deprecated": false,
+   "deprecation_date": "2032-04-30",
+   "deprecation_reason": null,
+   "deprecation_replacement_formula": null,
+   "deprecation_replacement_cask": null,
+   "deprecate_args": {
+    "date": "2032-04-30",
+    "because": "unsupported",
+    "replacement_formula": null,
+    "replacement_cask": null
+   },
+   "disabled": false,
+   "disable_date": null,
+   "disable_reason": null,
+   "disable_replacement_formula": null,
+   "disable_replacement_cask": null,
+   "disable_args": null,
+   "post_install_steps": [
+    {
+     "path": {
+      "base": "var",
+      "path": "mysql"
+     },
+     "using": "mysql_initialize",
+     "type": "init_data_dir"
+    }
+   ],
+   "post_install_defined": false,
+   "service": {
+    "run": [
+     "/opt/homebrew/opt/mysql@8.4/bin/mysqld_safe",
+     "--datadir=/opt/homebrew/var/mysql"
+    ],
+    "run_type": "immediate",
+    "keep_alive": {
+     "always": true
+    },
+    "working_dir": "/opt/homebrew/var/mysql"
+   },
+   "tap_git_head": "c42a64d2630cef3f8b9951b7013cd4ce1b6f2f8b",
+   "ruby_source_path": "Formula/m/mysql@8.4.rb",
+   "ruby_source_checksum": {
+    "sha256": "b928e8efe178206dd9061d480aa3052064b18e79e58dcd06d87b7d9e194af053"
+   }
+  },
+  {
+   "name": "node",
+   "full_name": "node",
+   "tap": "homebrew/core",
+   "oldnames": [],
+   "aliases": [
+    "node.js",
+    "node@26",
+    "nodejs",
+    "npm"
+   ],
+   "versioned_formulae": [
+    "node@24",
+    "node@22",
+    "node@20"
+   ],
+   "desc": "Open-source, cross-platform JavaScript runtime environment",
+   "license": "MIT",
+   "homepage": "https://nodejs.org/",
+   "versions": {
+    "stable": "26.13.1",
+    "head": "HEAD",
+    "bottle": true
+   },
+   "urls": {
+    "stable": {
+     "url": "https://nodejs.org/dist/v26.13.1/node-v26.13.1.tar.xz",
+     "tag": null,
+     "revision": null,
+     "using": null,
+     "checksum": "a7f6204ff63b6a2cd274d48903285abb86ed53a99070e532d4c2fd787457d9e6"
+    },
+    "head": {
+     "url": "https://github.com/nodejs/node.git",
+     "branch": "main",
+     "using": null
+    }
+   },
+   "patches": [
+    {
+     "strip": "p1",
+     "file": "Patches/node/icu4c-79.patch"
+    }
+   ],
+   "local_patch_checksums": {
+    "Patches/node/icu4c-79.patch": "7e6c50808fe8b9406fd2464b66814a9bf2c8d892268374ac9bcb7ec8039a65e9"
+   },
+   "revision": 0,
+   "version_scheme": 0,
+   "compatibility_version": 1,
+   "autobump": true,
+   "no_autobump_message": null,
+   "skip_livecheck": false,
+   "bottle": {
+    "stable": {
+     "rebuild": 0,
+     "root_url": "https://ghcr.io/v2/homebrew/core",
+     "files": {
+      "arm64_golden_gate": {
+       "cellar": "/opt/homebrew/Cellar",
+       "url": "https://ghcr.io/v2/homebrew/core/node/blobs/sha256:55ddb379469402e702791d382ae5cbae8dec5dbbe155b525b59c052645f115bd",
+       "sha256": "55ddb379469402e702791d382ae5cbae8dec5dbbe155b525b59c052645f115bd"
+      }
+     }
+    }
+   },
+   "pour_bottle_only_if": null,
+   "keg_only": false,
+   "keg_only_reason": null,
+   "options": [],
+   "build_dependencies": [
+    "pkgconf",
+    "python@3.15",
+    "rust"
+   ],
+   "dependencies": [
+    "abseil",
+    "ada-url",
+    "brotli",
+    "c-ares",
+    "hdrhistogram_c",
+    "icu4c@79",
+    "libffi",
+    "libnghttp2",
+    "libuv",
+    "llhttp",
+    "merve",
+    "nbytes",
+    "openssl@4",
+    "simdjson",
+    "simdutf",
+    "sqlite",
+    "uvwasi",
+    "zstd",
+    "highway"
+   ],
+   "test_dependencies": [],
+   "recommended_dependencies": [],
+   "optional_dependencies": [],
+   "no_linkage_dependencies": [],
+   "uses_from_macos": [
+    "python"
+   ],
+   "uses_from_macos_bounds": [
+    {}
+   ],
+   "requirements": [],
+   "conflicts_with": [],
+   "conflicts_with_reasons": [],
+   "link_overwrite": [
+    "bin/npm",
+    "bin/npx"
+   ],
+   "caveats": "Single Executable Application is disabled as it doesn't work with shared libnode.\n",
+   "installed": [
+    {
+     "sbom": "/opt/homebrew/Cellar/node/26.13.1/sbom.spdx.json",
+     "version": "26.13.1",
+     "used_options": [],
+     "built_as_bottle": true,
+     "poured_from_bottle": true,
+     "time": 1794568157,
+     "runtime_dependencies": [
+      {
+       "full_name": "abseil",
+       "version": "20260817.0",
+       "revision": 0,
+       "bottle_rebuild": 1,
+       "pkg_version": "20260817.0",
+       "declared_directly": true,
+       "compatibility_version": 3
+      },
+      {
+       "full_name": "fmt",
+       "version": "12.2.1",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "12.2.1",
+       "declared_directly": false,
+       "compatibility_version": 2
+      },
+      {
+       "full_name": "icu4c@79",
+       "version": "79.1",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "79.1",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "simdutf",
+       "version": "9.3.3",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "9.3.3",
+       "declared_directly": true,
+       "compatibility_version": 7
+      },
+      {
+       "full_name": "ada-url",
+       "version": "4.0.0",
+       "revision": 1,
+       "bottle_rebuild": 0,
+       "pkg_version": "4.0.0_1",
+       "declared_directly": true,
+       "compatibility_version": 2
+      },
+      {
+       "full_name": "brotli",
+       "version": "1.2.1",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "1.2.1",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "c-ares",
+       "version": "1.34.9",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "1.34.9",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "hdrhistogram_c",
+       "version": "0.12.1",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "0.12.1",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "libffi",
+       "version": "3.8.0",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "3.8.0",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "libnghttp2",
+       "version": "1.71.0",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "1.71.0",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "libuv",
+       "version": "1.53.0",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "1.53.0",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "llhttp",
+       "version": "9.4.3",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "9.4.3",
+       "declared_directly": true,
+       "compatibility_version": 2
+      },
+      {
+       "full_name": "merve",
+       "version": "1.2.2",
+       "revision": 4,
+       "bottle_rebuild": 0,
+       "pkg_version": "1.2.2_4",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "nbytes",
+       "version": "0.1.4",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "0.1.4",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "ca-certificates",
+       "version": "2026-11-05",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "2026-11-05",
+       "declared_directly": false,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "openssl@4",
+       "version": "4.1.0",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "4.1.0",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "simdjson",
+       "version": "5.1.1",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "5.1.1",
+       "declared_directly": true,
+       "compatibility_version": 2
+      },
+      {
+       "full_name": "readline",
+       "version": "8.3.6",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "8.3.6",
+       "declared_directly": false,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "sqlite",
+       "version": "3.54.1",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "3.54.1",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "uvwasi",
+       "version": "0.0.23",
+       "revision": 0,
+       "bottle_rebuild": 1,
+       "pkg_version": "0.0.23",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "lz4",
+       "version": "1.11.1",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "1.11.1",
+       "declared_directly": false,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "xz",
+       "version": "5.8.4",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "5.8.4",
+       "declared_directly": false,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "zstd",
+       "version": "1.5.7",
+       "revision": 1,
+       "bottle_rebuild": 0,
+       "pkg_version": "1.5.7_1",
+       "declared_directly": true,
+       "compatibility_version": 1
+      },
+      {
+       "full_name": "highway",
+       "version": "1.4.0",
+       "revision": 0,
+       "bottle_rebuild": 0,
+       "pkg_version": "1.4.0",
+       "declared_directly": true,
+       "compatibility_version": 1
+      }
+     ],
+     "installed_on_request": false
+    }
+   ],
+   "linked_keg": "26.13.1",
+   "pinned": false,
+   "outdated": false,
+   "deprecated": false,
+   "deprecation_date": null,
+   "deprecation_reason": null,
+   "deprecation_replacement_formula": null,
+   "deprecation_replacement_cask": null,
+   "deprecate_args": null,
+   "disabled": false,
+   "disable_date": null,
+   "disable_reason": null,
+   "disable_replacement_formula": null,
+   "disable_replacement_cask": null,
+   "disable_args": null,
+   "post_install_steps": [
+    {
+     "path": {
+      "path": "{{HOMEBREW_PREFIX}}/lib/node_modules"
+     },
+     "type": "mkdir_p"
+    },
+    {
+     "path": {
+      "path": "{{HOMEBREW_PREFIX}}/share/man/man1"
+     },
+     "type": "mkdir_p"
+    },
+    {
+     "path": {
+      "path": "{{HOMEBREW_PREFIX}}/share/man/man5"
+     },
+     "type": "mkdir_p"
+    },
+    {
+     "path": {
+      "path": "{{HOMEBREW_PREFIX}}/share/man/man7"
+     },
+     "type": "mkdir_p"
+    },
+    {
+     "paths": [
+      {
+       "path": "{{HOMEBREW_PREFIX}}/lib/node_modules/npm"
+      }
+     ],
+     "recursive": true,
+     "guards": [
+      {
+       "path": "{{HOMEBREW_PREFIX}}/lib/node_modules/npm",
+       "condition": "if_exists",
+       "id": "1"
+      }
+     ],
+     "type": "remove"
+    },
+    {
+     "source": {
+      "path": "{{libexec}}/lib/node_modules/npm"
+     },
+     "target": {
+      "path": "{{HOMEBREW_PREFIX}}/lib/node_modules"
+     },
+     "recursive": true,
+     "type": "copy"
+    },
+    {
+     "source": {
+      "path": "{{HOMEBREW_PREFIX}}/lib/node_modules/npm/bin/npm-cli.js"
+     },
+     "target": {
+      "path": "{{bin}}/npm"
+     },
+     "force": true,
+     "type": "symlink"
+    },
+    {
+     "source": {
+      "path": "{{HOMEBREW_PREFIX}}/lib/node_modules/npm/bin/npx-cli.js"
+     },
+     "target": {
+      "path": "{{bin}}/npx"
+     },
+     "force": true,
+     "type": "symlink"
+    },
+    {
+     "source": {
+      "path": "{{HOMEBREW_PREFIX}}/lib/node_modules/npm/man/man1/{npm,npx,package-}*"
+     },
+     "target": {
+      "path": "{{HOMEBREW_PREFIX}}/share/man/man1"
+     },
+     "force": true,
+     "source_glob": true,
+     "type": "symlink"
+    },
+    {
+     "source": {
+      "path": "{{HOMEBREW_PREFIX}}/lib/node_modules/npm/man/man5/{npm,npx,package-}*"
+     },
+     "target": {
+      "path": "{{HOMEBREW_PREFIX}}/share/man/man5"
+     },
+     "force": true,
+     "source_glob": true,
+     "type": "symlink"
+    },
+    {
+     "source": {
+      "path": "{{HOMEBREW_PREFIX}}/lib/node_modules/npm/man/man7/{npm,npx,package-}*"
+     },
+     "target": {
+      "path": "{{HOMEBREW_PREFIX}}/share/man/man7"
+     },
+     "force": true,
+     "source_glob": true,
+     "type": "symlink"
+    }
+   ],
+   "post_install_defined": false,
+   "service": null,
+   "tap_git_head": "c42a64d2630cef3f8b9951b7013cd4ce1b6f2f8b",
+   "ruby_source_path": "Formula/n/node.rb",
+   "ruby_source_checksum": {
+    "sha256": "6a18533cfc17343b69582bb63966940ac8566837c491f3bb8447e96a485d8037"
+   }
+  }
+ ],
+ "casks": [
+  {
+   "token": "claude-code",
+   "full_token": "claude-code",
+   "old_tokens": [],
+   "tap": "homebrew/cask",
+   "name": [
+    "Claude Code"
+   ],
+   "desc": "Terminal-based AI coding assistant",
+   "homepage": "https://claude.com/product/claude-code",
+   "url": "https://downloads.claude.ai/claude-code-releases/2.1.311/darwin-arm64/claude",
+   "url_specs": {},
+   "version": "2.1.311",
+   "autobump": true,
+   "no_autobump_message": null,
+   "skip_livecheck": false,
+   "installed": "2.1.311",
+   "installed_time": 1794562121,
+   "bundle_version": null,
+   "bundle_short_version": null,
+   "pinned": false,
+   "pinned_version": null,
+   "outdated": false,
+   "sha256": "85d8c08707fcfd1e78ffa0204eefbc6ec9e4fe22f375fb2767ef85d957ed3161",
+   "artifacts": [
+    {
+     "binary": [
+      "claude"
+     ],
+     "target": "/opt/homebrew/bin/claude"
+    },
+    {
+     "zap": [
+      {
+       "trash": [
+        "~/.cache/claude",
+        "~/.claude.json*",
+        "~/.config/claude",
+        "~/.local/bin/claude",
+        "~/.local/share/claude",
+        "~/.local/state/claude",
+        "~/Library/Caches/claude-cli-nodejs"
+       ],
+       "rmdir": "~/.claude"
+      }
+     ]
+    }
+   ],
+   "caveats": null,
+   "caveats_rosetta": null,
+   "depends_on": {},
+   "conflicts_with": {
+    "cask": [
+     "claude-code@latest"
+    ]
+   },
+   "container": null,
+   "rename": [],
+   "auto_updates": null,
+   "deprecated": false,
+   "deprecation_date": null,
+   "deprecation_reason": null,
+   "deprecation_replacement_formula": null,
+   "deprecation_replacement_cask": null,
+   "deprecate_args": null,
+   "disabled": false,
+   "disable_date": null,
+   "disable_reason": null,
+   "disable_replacement_formula": null,
+   "disable_replacement_cask": null,
+   "disable_args": null,
+   "tap_git_head": "7397801fbe3ada511d5ac422b78730f4735af8f9",
+   "languages": [],
+   "ruby_source_path": "Casks/c/claude-code.rb",
+   "ruby_source_checksum": {
+    "sha256": "c04066c2a4f771c8bac604d50855c3e54cc396d4caf3c0b1a69ce89d4bf51b70"
+   }
+  },
+  {
+   "token": "iina",
+   "full_token": "iina",
+   "old_tokens": [],
+   "tap": "homebrew/cask",
+   "name": [
+    "IINA"
+   ],
+   "desc": "Free and open-source media player",
+   "homepage": "https://iina.io/",
+   "url": "https://dl.iina.io/IINA.v1.5.1.dmg",
+   "url_specs": {},
+   "version": "1.5.1",
+   "autobump": true,
+   "no_autobump_message": null,
+   "skip_livecheck": false,
+   "installed": "1.5.1",
+   "installed_time": 1794597309,
+   "bundle_version": "183",
+   "bundle_short_version": "1.5.1",
+   "pinned": false,
+   "pinned_version": null,
+   "outdated": false,
+   "sha256": "f414507ec60bcfeda3a9f539f74470253e31b619d031e7a9e9a71519da1598cd",
+   "artifacts": [
+    {
+     "uninstall": [
+      {
+       "quit": "com.colliderli.iina"
+      }
+     ]
+    },
+    {
+     "app": [
+      "IINA.app"
+     ],
+     "target": "/Applications/IINA.app"
+    },
+    {
+     "binary": [
+      "/Applications/IINA.app/Contents/MacOS/iina-cli",
+      {
+       "target": "iina"
+      }
+     ],
+     "target": "/opt/homebrew/bin/iina"
+    },
+    {
+     "zap": [
+      {
+       "trash": [
+        "~/Library/Application Scripts/com.colliderli.iina.OpenInIINA",
+        "~/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.ApplicationRecentDocuments/com.colliderli.iina.sfl*",
+        "~/Library/Application Support/com.colliderli.iina",
+        "~/Library/Application Support/CrashReporter/IINA*.plist",
+        "~/Library/Caches/com.colliderli.iina",
+        "~/Library/Containers/com.colliderli.iina.OpenInIINA",
+        "~/Library/Cookies/com.colliderli.iina.binarycookies",
+        "~/Library/HTTPStorages/com.colliderli.iina",
+        "~/Library/Logs/com.colliderli.iina",
+        "~/Library/Logs/DiagnosticReports/IINA*.crash",
+        "~/Library/Preferences/com.colliderli.iina.plist",
+        "~/Library/Safari/Extensions/Open in IINA*.safariextz",
+        "~/Library/Saved Application State/com.colliderli.iina.savedState",
+        "~/Library/WebKit/com.colliderli.iina"
+       ]
+      }
+     ]
+    }
+   ],
+   "caveats": null,
+   "caveats_rosetta": null,
+   "depends_on": {
+    "macos": {
+     ">=": [
+      "12"
+     ]
+    }
+   },
+   "conflicts_with": null,
+   "container": null,
+   "rename": [],
+   "auto_updates": true,
+   "deprecated": false,
+   "deprecation_date": null,
+   "deprecation_reason": null,
+   "deprecation_replacement_formula": null,
+   "deprecation_replacement_cask": null,
+   "deprecate_args": null,
+   "disabled": false,
+   "disable_date": null,
+   "disable_reason": null,
+   "disable_replacement_formula": null,
+   "disable_replacement_cask": null,
+   "disable_args": null,
+   "tap_git_head": "7397801fbe3ada511d5ac422b78730f4735af8f9",
+   "languages": [],
+   "ruby_source_path": "Casks/i/iina.rb",
+   "ruby_source_checksum": {
+    "sha256": "52607d9c3447b9791bc6549504dd1e1fd0e185118823709dd4ee021c6b4a8611"
+   }
+  },
+  {
+   "token": "warp",
+   "full_token": "warp",
+   "old_tokens": [],
+   "tap": "homebrew/cask",
+   "name": [
+    "Warp"
+   ],
+   "desc": "Rust-based terminal",
+   "homepage": "https://www.warp.dev/terminal",
+   "url": "https://app.warp.dev/download/brew?version=v0.2026.11.11.08.17.stable_01&package=dmg",
+   "url_specs": {},
+   "version": "0.2026.11.11.08.17.stable_01",
+   "autobump": true,
+   "no_autobump_message": null,
+   "skip_livecheck": false,
+   "installed": "0.2026.11.11.08.17.stable_01",
+   "installed_time": 1794561903,
+   "bundle_version": "0.2026.11.11.08.17.01",
+   "bundle_short_version": "0.2026.11.11.08.17.01",
+   "pinned": false,
+   "pinned_version": null,
+   "outdated": false,
+   "sha256": "8767bc168e167bfb43f7a5d3a66dc19eb576edab22fd8c6a909fa4f152fd85cb",
+   "artifacts": [
+    {
+     "app": [
+      "Warp.app"
+     ],
+     "target": "/Applications/Warp.app"
+    },
+    {
+     "zap": [
+      {
+       "trash": [
+        "~/.warp",
+        "~/Library/Application Scripts/2BBY89MBSN.dev.warp",
+        "~/Library/Application Support/dev.warp.Warp-Stable",
+        "~/Library/Caches/dev.warp.Warp-Stable",
+        "~/Library/Group Containers/2BBY89MBSN.dev.warp",
+        "~/Library/Logs/warp.log*",
+        "~/Library/Preferences/dev.warp.Warp-Stable.plist",
+        "~/Library/Saved Application State/dev.warp.Warp-Stable.savedState"
+       ]
+      }
+     ]
+    }
+   ],
+   "caveats": null,
+   "caveats_rosetta": null,
+   "depends_on": {},
+   "conflicts_with": null,
+   "container": null,
+   "rename": [],
+   "auto_updates": true,
+   "deprecated": false,
+   "deprecation_date": null,
+   "deprecation_reason": null,
+   "deprecation_replacement_formula": null,
+   "deprecation_replacement_cask": null,
+   "deprecate_args": null,
+   "disabled": false,
+   "disable_date": null,
+   "disable_reason": null,
+   "disable_replacement_formula": null,
+   "disable_replacement_cask": null,
+   "disable_args": null,
+   "tap_git_head": "7397801fbe3ada511d5ac422b78730f4735af8f9",
+   "languages": [],
+   "ruby_source_path": "Casks/w/warp.rb",
+   "ruby_source_checksum": {
+    "sha256": "0a028762c2795a04f4fd85902cc33cf4d5bf7d0c510000148e80e0965e5c8a3b"
+   }
+  }
+ ]
+}

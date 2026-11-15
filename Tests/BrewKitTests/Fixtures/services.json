@@ -1,0 +1,30 @@
+[
+  {
+    "name": "mongodb-community@8.0",
+    "status": "started",
+    "user": "me",
+    "file": "/Users/me/Library/LaunchAgents/sh.brew.mongodb-community@8.0.plist",
+    "exit_code": null
+  },
+  {
+    "name": "mysql@8.4",
+    "status": "started",
+    "user": "me",
+    "file": "/Users/me/Library/LaunchAgents/sh.brew.mysql@8.4.plist",
+    "exit_code": null
+  },
+  {
+    "name": "postgresql@18",
+    "status": "none",
+    "user": null,
+    "file": "/opt/homebrew/opt/postgresql@18/sh.brew.postgresql@18.plist",
+    "exit_code": null
+  },
+  {
+    "name": "redis",
+    "status": "none",
+    "user": null,
+    "file": "/opt/homebrew/opt/redis/sh.brew.redis.plist",
+    "exit_code": null
+  }
+]

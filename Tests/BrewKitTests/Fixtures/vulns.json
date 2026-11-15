@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "formula": "libxml2",
+      "version": "2.13.4",
+      "tag": "v2.13.4",
+      "repo_url": "https://gitlab.gnome.org/GNOME/libxml2",
+      "vulnerabilities": [
+        {
+          "id": "CVE-2025-24928",
+          "severity": "MEDIUM",
+          "summary": "Stack-based buffer overflow in xmlSnprintfElements",
+          "aliases": [],
+          "fixed_versions": ["2.13.6", "8a6b9e1c0d2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b"]
+        },
+        {
+          "id": "CVE-2025-27113",
+          "severity": "HIGH",
+          "summary": "NULL pointer dereference in xmlPatPushState",
+          "aliases": ["GHSA-xxxx-yyyy-zzzz"],
+          "fixed_versions": ["2.13.6"]
+        }
+      ],
+      "patched": []
+    },
+    {
+      "formula": "mongodb/brew/mongosh",
+      "version": "2.3.0",
+      "tag": "v2.3.0",
+      "repo_url": "https://github.com/mongodb-js/mongosh",
+      "vulnerabilities": [
+        {
+          "id": "GHSA-aaaa-bbbb-cccc",
+          "severity": "UNKNOWN",
+          "summary": null,
+          "aliases": [],
+          "fixed_versions": ["0123456789abcdef0123456789abcdef01234567"]
+        }
+      ],
+      "patched": []
+    },
+    {
+      "formula": "openssl@3",
+      "version": "3.4.0",
+      "tag": "openssl-3.4.0",
+      "repo_url": "https://github.com/openssl/openssl",
+      "vulnerabilities": [],
+      "patched": [
+        {"id": "CVE-2024-0001", "severity": "LOW", "summary": "Fixed by a formula patch", "aliases": [], "fixed_versions": []}
+      ]
+    }
+  ],
+  "skipped_formulae": ["abseil"],
+  "checked": 72,
+  "complete": false,
+  "outdated_without_sbom": [],
+  "unscanned_formulae": {"sometap-formula": "untrusted_tap"}
+}
