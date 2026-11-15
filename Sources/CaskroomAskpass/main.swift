@@ -44,7 +44,11 @@ func askForPassword() -> String? {
     let alert = NSAlert()
     if let icon { alert.icon = icon }
     alert.messageText = "Caskroom wants to make changes."
-    alert.informativeText = "Homebrew needs an administrator password to finish this. Enter your password to allow this."
+    // Caskroom says why when it asks for itself (removing an app's files);
+    // otherwise it's brew asking.
+    let reason = ProcessInfo.processInfo.environment["CASKROOM_ASKPASS_REASON"]
+        ?? "Homebrew needs an administrator password to finish this."
+    alert.informativeText = "\(reason) Enter your password to allow this."
     alert.addButton(withTitle: "OK")
     alert.addButton(withTitle: "Cancel").keyEquivalent = "\u{1b}"
 

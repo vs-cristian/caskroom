@@ -2,7 +2,7 @@
 
 Homebrew, the way Apple would have built it: a native Mac app for browsing, installing and updating everything `brew` manages.
 
-Caskroom is a front end to the `brew` command you already have. It runs `brew`, reads its JSON, and shows you the exact command behind every action. It never reimplements Homebrew or touches its files.
+Caskroom is a front end to the `brew` command you already have. It runs `brew`, reads its JSON, and shows you the exact command behind every action. It never reimplements Homebrew or touches its files. The one thing it does itself is clear away the files an uninstalled app leaves behind, which `brew` has no command for.
 
 **[vs-cristian.github.io/caskroom](https://vs-cristian.github.io/caskroom/)**
 
@@ -13,6 +13,7 @@ Caskroom is a front end to the `brew` command you already have. It runs `brew`, 
 - **Discover.** Top apps, top command-line tools, what's trending and what's new in Homebrew, laid out like the App Store, with real app icons and project logos.
 - **Updates.** One list for formulae and apps, with release notes per package, Update All, and a history of what Caskroom updated. ⌘-click several to update, pin or uninstall them together, here or in your library.
 - **Adopt.** Finds apps already in your Applications folder that Homebrew has a cask for and hands them over without downloading them again.
+- **Uninstall apps completely.** Any app, from Homebrew or not: it goes to the Trash with its settings, caches, containers, launch agents, privileged helpers and installer receipts. You see the list first, ticked by how sure Caskroom is, AppCleaner style. Drop an app on the page, or pick one with File ▸ Uninstall App….
 - **Revert.** Puts a formula back to the version it had before its last update.
 - **Services.** `brew services` as Login Items: a switch for start at login, Run and Stop for right now, and the log one click away.
 - **Search.** Packages by name, or by the command they install (`rg` finds ripgrep).

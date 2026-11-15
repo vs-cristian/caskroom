@@ -30,6 +30,7 @@ struct Sidebar: View {
                 row(.taps)
                 // Last, and without a badge: occasionally useful, rarely urgent.
                 row(.adopt)
+                row(.uninstallApps)
             }
         }
     }

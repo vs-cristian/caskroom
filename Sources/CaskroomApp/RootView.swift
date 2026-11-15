@@ -64,7 +64,10 @@ struct RootView: View {
         ) { ref in
             if store.dependents(of: ref).isEmpty {
                 Button("Uninstall", role: .destructive) { store.enqueue(store.uninstallOperation(ref)) }
-                if store.package(ref)?.hasZap == true {
+                if let path = store.installedPackage(ref)?.appPath, FileManager.default.fileExists(atPath: path) {
+                    // Brew's zap, then what it doesn't list, after showing what that is.
+                    Button("Uninstall and Delete App Data…", role: .destructive) { store.uninstallApp(cask: ref) }
+                } else if store.package(ref)?.hasZap == true {
                     Button("Uninstall and Delete App Data", role: .destructive) { store.enqueue(store.uninstallOperation(ref, zap: true)) }
                 }
             } else {
@@ -74,6 +77,8 @@ struct RootView: View {
             let dependents = store.dependents(of: ref)
             if !dependents.isEmpty {
                 Text("\(dependents.map(\.name).formatted(.list(type: .and))) \(dependents.count == 1 ? "depends" : "depend") on it. Homebrew won't uninstall it until \(dependents.count == 1 ? "that's" : "they're") uninstalled.")
+            } else if ref.kind == .cask, store.installedPackage(ref)?.appPath.map(FileManager.default.fileExists(atPath:)) == true {
+                Text("The app is removed from your Applications folder. Deleting its data also removes its settings, caches, containers and helpers; you'll see the list first.")
             } else if store.package(ref)?.hasZap == true {
                 Text("The app is removed from your Applications folder. Deleting its data also removes its settings, caches and support files, including any it shares with other apps.")
             } else if ref.kind == .cask {
@@ -109,6 +114,9 @@ struct RootView: View {
             }
         } message: { plan in
             Text(bulkUninstallMessage(plan))
+        }
+        .sheet(item: $store.appRemoval) { removal in
+            AppRemovalSheet(removal: removal)
         }
         .sheet(item: $store.brewfileImport) { preview in
             BrewfileImportSheet(preview: preview)
@@ -202,6 +210,7 @@ struct RootView: View {
             case .services: ServicesPage()
             case .taps: TapsPage()
             case .adopt: AdoptPage()
+            case .uninstallApps: UninstallAppsPage()
             case let .library(filter): LibraryPage(filter: filter)
             }
         }

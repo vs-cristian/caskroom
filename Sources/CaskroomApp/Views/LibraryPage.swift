@@ -247,6 +247,11 @@ struct PackageMenu: View {
             Divider()
             Button("Uninstall…", role: .destructive) { store.uninstallCandidate = ref }
                 .disabled(busy)
+        } else if store.isAdoptable(ref), let path = store.package(ref)?.appPath {
+            // Installed by hand: no brew command, but the same sheet.
+            Divider()
+            Button("Uninstall App…", role: .destructive) { store.uninstallApp(at: URL(fileURLWithPath: path)) }
+                .disabled(store.appRemoval != nil)
         }
     }
 }

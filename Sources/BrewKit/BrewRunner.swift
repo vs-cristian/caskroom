@@ -76,11 +76,25 @@ public struct BrewRunner: Sendable {
     /// `BrewError.commandFailed` after the last line if the exit status is non-zero.
     /// Cancelling the consuming task terminates brew and everything it started.
     public func stream(_ args: [String], allowAutoUpdate: Bool = false) -> AsyncThrowingStream<LogLine, Error> {
-        let command = (["brew"] + args).joined(separator: " ")
+        launch(brewURL, args, command: (["brew"] + args).joined(separator: " "), environment: environment(allowAutoUpdate: allowAutoUpdate))
+    }
+
+    /// Runs `script` with `/bin/sh` as root, through sudo: Touch ID when it's
+    /// on, else the askpass helper's password dialog, which says `reason`.
+    /// Fails without either, since there's no terminal to ask in.
+    public func privileged(_ script: String, reason: String) -> AsyncThrowingStream<LogLine, Error> {
+        var env = environment(allowAutoUpdate: false)
+        let askpass = env["SUDO_ASKPASS"] != nil
+        if askpass { env["CASKROOM_ASKPASS_REASON"] = reason }
+        let args = (askpass ? ["-A"] : []) + ["/bin/sh", "-c", script]
+        return launch(URL(fileURLWithPath: "/usr/bin/sudo"), args, command: "sudo sh -c …", environment: env)
+    }
+
+    private func launch(_ executable: URL, _ args: [String], command: String, environment: [String: String]) -> AsyncThrowingStream<LogLine, Error> {
         let process = Process()
-        process.executableURL = brewURL
+        process.executableURL = executable
         process.arguments = args
-        process.environment = environment(allowAutoUpdate: allowAutoUpdate)
+        process.environment = environment
         process.currentDirectoryURL = FileManager.default.homeDirectoryForCurrentUser
         // No terminal: anything that would prompt fails fast instead of hanging.
         // sudo asks through SUDO_ASKPASS instead.

@@ -53,6 +53,9 @@ public struct Package: Identifiable, Hashable, Sendable {
     public let autoUpdates: Bool
     /// A cask with a `zap` stanza: files outside the app that uninstalling can delete.
     public let hasZap: Bool
+    /// The files and folders a cask's `zap` trashes, as written there: with
+    /// `~` and globs (`~/Library/Preferences/com.example*.plist`).
+    public let zapPaths: [String]
     /// A cask whose `uninstall` stanza quits its app. brew quits such an app
     /// before upgrading it and reopens it after; any other is replaced while it runs.
     public let quitsApp: Bool
@@ -90,7 +93,7 @@ public struct Package: Identifiable, Hashable, Sendable {
         outdated: Bool = false, caveats: String? = nil, dependencies: [PackageRef] = [],
         deprecated: Bool = false, disabled: Bool = false, deprecation: Deprecation? = nil,
         disabling: Deprecation? = nil, license: String? = nil,
-        installedAt: Date? = nil, appPath: String? = nil, autoUpdates: Bool = false, hasZap: Bool = false,
+        installedAt: Date? = nil, appPath: String? = nil, autoUpdates: Bool = false, hasZap: Bool = false, zapPaths: [String] = [],
         quitsApp: Bool = false, downloadURL: URL? = nil, headURL: URL? = nil,
         kegOnly: Bool = false, kegOnlyReason: String? = nil, linked: Bool = false,
         otherVersions: [PackageRef] = [], conflicts: [PackageRef] = [], minimumMacOS: String? = nil,
@@ -118,6 +121,7 @@ public struct Package: Identifiable, Hashable, Sendable {
         self.appPath = appPath
         self.autoUpdates = autoUpdates
         self.hasZap = hasZap
+        self.zapPaths = zapPaths
         self.quitsApp = quitsApp
         self.downloadURL = downloadURL
         self.headURL = headURL

@@ -357,6 +357,7 @@ private struct CaskJSON: Decodable {
             appPath: appPath,
             autoUpdates: autoUpdates ?? false,
             hasZap: (artifacts ?? []).contains(where: \.isZap),
+            zapPaths: (artifacts ?? []).flatMap(\.zapPaths),
             quitsApp: (artifacts ?? []).contains(where: \.quitsApp),
             downloadURL: url.flatMap(URL.init(string:)),
             conflicts: (conflictsWith?.cask?.values ?? []).map { PackageRef(.cask, $0) }
@@ -377,13 +378,30 @@ private struct CaskJSON: Decodable {
 }
 
 /// One entry of a cask's `artifacts`. Entries are objects of many shapes (app,
-/// binary, zap…); only `app`, a string `target`, whether it's `zap` and whether
+/// binary, zap…); only `app`, a string `target`, `zap`'s paths and whether
 /// an `uninstall` directive quits an app are read, anything else is skipped.
 private struct Artifact: Decodable {
     let app: LenientStrings?
     let target: String?
     let isZap: Bool
     let quitsApp: Bool
+    /// What `zap` trashes or deletes, as written (`~`, globs).
+    let zapPaths: [String]
+
+    /// One `zap` directive: `{"trash": […]}`, `{"delete": "…"}`, `{"rmdir": …}`…
+    /// `rmdir` (only if empty) and the non-path ones are left out.
+    private struct ZapDirective: Decodable {
+        let paths: [String]
+
+        enum CodingKeys: CodingKey { case trash, delete }
+
+        init(from decoder: Decoder) throws {
+            let container = try? decoder.container(keyedBy: CodingKeys.self)
+            paths = [CodingKeys.trash, .delete].flatMap { key in
+                (try? container?.decodeIfPresent(LenientStrings.self, forKey: key))?.values ?? []
+            }
+        }
+    }
 
     enum CodingKeys: CodingKey { case app, target, zap, uninstall }
 
@@ -403,6 +421,8 @@ private struct Artifact: Decodable {
         app = try? container?.decodeIfPresent(LenientStrings.self, forKey: .app)
         target = try? container?.decodeIfPresent(String.self, forKey: .target)
         isZap = container?.contains(.zap) ?? false
+        let zap = try? container?.decodeIfPresent([ZapDirective].self, forKey: .zap)
+        zapPaths = zap?.flatMap(\.paths) ?? []
         let directives = try? container?.decodeIfPresent([Directive].self, forKey: .uninstall)
         quitsApp = directives?.contains(where: \.quits) ?? false
     }

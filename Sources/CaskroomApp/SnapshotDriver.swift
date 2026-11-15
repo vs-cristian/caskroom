@@ -26,6 +26,10 @@ enum SnapshotDriver {
     #if DEBUG
     private static func run(store: BrewStore) async {
         let env = ProcessInfo.processInfo.environment
+        if let path = env["CASKROOM_TEST_UNINSTALL"] {
+            await testUninstall(path, confirm: env["CASKROOM_TEST_UNINSTALL_CONFIRM"] == "1", store: store)
+            return
+        }
         guard let dir = env["CASKROOM_SNAPSHOT_DIR"] else { return }
         let output = URL(fileURLWithPath: dir)
         try? FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
@@ -174,8 +178,14 @@ enum SnapshotDriver {
                 let needed = store.installed.first { !store.dependents(of: $0.ref).isEmpty }.map { [$0.ref] } ?? []
                 store.bulkUninstall = store.uninstallPlan(Set(apps + needed))
             }),
+            ("23-uninstall-apps", 4, { store.bulkUninstall = nil; store.brewfileImport = nil; store.sidebar = .uninstallApps }),
+            // Only looks: nothing is removed unless the sheet's button is clicked.
+            ("24-app-removal", 6, {
+                if let app = store.otherApps?.first { store.uninstallApp(at: URL(fileURLWithPath: app.path)) }
+            }),
             ("9-activity", 2, {
                 store.bulkUninstall = nil
+                store.appRemoval = nil
                 store.path = NavigationPath(); store.searchText = ""; store.sidebar = .library(.all); store.showActivity = true
             }),
             ("10-inserted-row", 2, {
@@ -220,6 +230,54 @@ enum SnapshotDriver {
         }
         // An open sheet keeps the app from quitting.
         store.doctor = nil
+        try? await Task.sleep(for: .seconds(1))
+        NSApp.terminate(nil)
+    }
+
+    /// `CASKROOM_TEST_UNINSTALL=<app path>`: opens the uninstall sheet for that
+    /// app and prints what it found; with `CASKROOM_TEST_UNINSTALL_CONFIRM=1`
+    /// also clicks the sheet's button (which really moves things to the
+    /// Trash) and prints the outcome. Then quits.
+    private static func testUninstall(_ path: String, confirm: Bool, store: BrewStore) async {
+        func log(_ text: String) { print("UNINSTALL \(text)"); fflush(stdout) }
+        for _ in 0..<120 where store.installed.isEmpty || store.isRefreshing {
+            try? await Task.sleep(for: .milliseconds(500))
+        }
+        store.uninstallApp(at: URL(fileURLWithPath: path))
+        guard let removal = store.appRemoval else { log("no sheet"); NSApp.terminate(nil); return }
+        for _ in 0..<240 where removal.state == .scanning {
+            try? await Task.sleep(for: .milliseconds(250))
+        }
+        log("state \(removal.state) cask \(removal.cask?.name ?? "-") running \(store.isRunning(removal)) admin \(removal.needsAdministrator)")
+        for leftover in removal.leftovers {
+            log("\(removal.selected.contains(leftover.path) ? "[x]" : "[ ]") \(leftover.evidence)\(leftover.needsAdministrator ? " admin" : "") \(leftover.path)")
+        }
+        log("receipts \(removal.receipts)")
+        guard confirm, removal.state == .ready else { store.appRemoval = nil; NSApp.terminate(nil); return }
+        store.confirmRemoval(removal)
+        if removal.cask != nil {
+            try? await Task.sleep(for: .seconds(1))
+            for _ in 0..<600 where store.hasPendingOperations || !store.leftoverCleanups.isEmpty {
+                try? await Task.sleep(for: .milliseconds(500))
+            }
+            if let run = store.operations.last {
+                log("brew \(run.operation.command): \(run.state)")
+                for line in run.log.suffix(40) { log("  \(line.text)") }
+            }
+        } else {
+            for _ in 0..<600 {
+                if case .finished = removal.state { break }
+                try? await Task.sleep(for: .milliseconds(250))
+            }
+            if case let .finished(outcome) = removal.state {
+                for path in outcome.moved { log("moved \(path)") }
+                for failure in outcome.failed { log("FAILED \(failure.path): \(failure.reason)") }
+                log("forgot \(outcome.forgotten) declined \(outcome.administratorDeclined)")
+            } else {
+                log("never finished: \(removal.state)")
+            }
+        }
+        store.appRemoval = nil
         try? await Task.sleep(for: .seconds(1))
         NSApp.terminate(nil)
     }

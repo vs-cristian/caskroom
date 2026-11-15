@@ -27,6 +27,9 @@ struct CaskroomApp: App {
                     .disabled(store.service == nil)
                 Button("Export Brewfile…") { exportBrewfile(store) }
                     .disabled(store.service == nil)
+                Divider()
+                Button("Uninstall App…") { chooseAppToUninstall(store) }
+                    .disabled(store.appRemoval != nil)
             }
             CommandGroup(after: .textEditing) {
                 Button("Search") { NotificationCenter.default.post(name: .focusSearch, object: nil) }

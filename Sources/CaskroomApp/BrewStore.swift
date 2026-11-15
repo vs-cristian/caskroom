@@ -44,7 +44,7 @@ enum LibraryFilter: String, Hashable, CaseIterable, Identifiable {
 }
 
 enum SidebarItem: Hashable {
-    case discover, updates, security, services, taps, adopt
+    case discover, updates, security, services, taps, adopt, uninstallApps
     case library(LibraryFilter)
 
     var title: String {
@@ -55,6 +55,7 @@ enum SidebarItem: Hashable {
         case .services: "Services"
         case .taps: "Taps"
         case .adopt: "Adopt Apps"
+        case .uninstallApps: "Uninstall Apps"
         case let .library(filter): filter.title
         }
     }
@@ -67,6 +68,7 @@ enum SidebarItem: Hashable {
         case .services: "gearshape.2"
         case .taps: "puzzlepiece.extension"
         case .adopt: "square.and.arrow.down.on.square"
+        case .uninstallApps: "trash"
         case let .library(filter): filter.symbol
         }
     }
@@ -301,6 +303,17 @@ final class BrewStore {
     var commandIndex = CommandIndex()
 
     var adoption: AdoptionScan?
+    /// Homebrew's cask list as app bundle name → casks, once read.
+    @ObservationIgnored var caskIndex: [String: [String]]?
+
+    /// Apps Homebrew doesn't manage, once the Uninstall Apps page has looked.
+    var otherApps: [AppIdentity]?
+    var scanningOtherApps = false
+    /// The app being uninstalled with its files; RootView shows the sheet.
+    var appRemoval: AppRemoval?
+    /// Casks brew is uninstalling from that sheet, with what to move to the
+    /// Trash once it's done.
+    @ObservationIgnored var leftoverCleanups: [PackageRef: AppRemoval] = [:]
 
     /// Set to ask before reverting; RootView shows the dialog.
     var revertRequest: RevertRequest?
@@ -637,6 +650,7 @@ final class BrewStore {
                 try await DownloadCache.download(AdoptionIndex.url)
             }
             let index = try AdoptionIndex.casksByApp(from: data)
+            caskIndex = index
             let managed = Set(installed.compactMap(\.appPath))
             let fileManager = FileManager.default
             var paths: [String: String] = [:]
@@ -1253,6 +1267,7 @@ final class BrewStore {
             currentTask = nil
             // The log opens by itself only when something you did needs reading.
             if case .failed = next.state, !next.automatic { showActivity = true }
+            await finishCaskRemoval(next)
             if !next.automatic { Notifier.finished(next) }
             settling = next
             if next.operation.changesFormulae { vulnerabilitiesStale = true }
